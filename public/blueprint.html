@@ -53,10 +53,93 @@
       stroke: #87ceeb;
       stroke-width: 2px;
     }
+
+    #toolbox {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 99;
+        background: #181a21cc;
+        padding: 14px 16px 10px 14px;
+        border-radius: 10px;
+        box-shadow: 0 3px 18px #000a;
+        width: max-content; /* allow full button width */
+        max-width: none;    /* remove width limit */
+    }
+
+    .toolbox-btn {
+    display: block;
+    width: 100%;
+    margin: 6px 0;
+    padding: 10px 14px;
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+    color: #ffffff;
+    background: linear-gradient(145deg, #1a1a1a, #111);
+    border: 1px solid #333;
+    border-radius: 6px;
+    text-align: left;
+    white-space: normal;
+    word-break: break-word;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px #000, 0 2px 4px rgba(0, 0, 0, 0.4);
+    transition: all 0.15s ease-in-out;
+    }
+    .toolbox-btn:hover {
+    background: linear-gradient(145deg, #232323, #181818);
+    border-color: #555;
+    box-shadow: inset 0 0 0 1px #333, 0 2px 8px rgba(0, 0, 0, 0.6);
+    color: #0ff;
+    }
+
+    .toolbox-btn:active {
+    transform: scale(0.98);
+    background: #101010;
+    border-color: #0ff;
+    color: #0ff;
+    }
+
+    .toolbox-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #0ff inset;
+    }
+
+    .top-right-corner {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 999;
+    }
+
+    .back-btn {
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+    color: #fff;
+    background: linear-gradient(145deg, #222, #111);
+    border: 1px solid #444;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px #000, 0 2px 4px rgba(0, 0, 0, 0.5);
+    transition: all 0.2s ease-in-out;
+    }
+
+    .back-btn:hover {
+    background: linear-gradient(145deg, #2a2a2a, #181818);
+    color: #ff5555;
+    border-color: #ff5555;
+    }
+
+    .back-btn:active {
+    transform: scale(0.97);
+    background: #0a0a0a;
+    box-shadow: inset 0 0 5px #ff5555;
+    }
+
   </style>
 </head>
 <body>
-    <div id="toolbox" style="position:fixed;top:10px;left:10px;z-index:99;background:#181a21cc;padding:14px 16px 10px 14px;border-radius:10px;box-shadow:0 3px 18px #000a">
+    <div id="toolbox">
         <b style="color:#00ffe0">Toolbox:</b><br>
         <button class="toolbox-btn" onclick="addBlueprintNode('Start')">+ Add Start Function</button><br>
         <button class="toolbox-btn" onclick="addBlueprintNode('Variable')">+ Add Variable</button><br>
@@ -72,9 +155,19 @@
         <button class="toolbox-btn" onclick="addBlueprintNode('End')">+ End Node</button><br>
         <button class="toolbox-btn" onclick="saveBlueprint()">💾 Save Blueprint</button>
         <button class="toolbox-btn" onclick="runCurrentBlueprint()">▶️ Run Blueprint</button>
+        <button class="toolbox-btn" onclick="loadBlueprint()">▶️ Load Blueprint</button>
+        <button class="toolbox-btn" onclick="exportBlueprint()">▶️ Export Blueprint</button>
 
     </div>
-    
+
+    <div id="dropzone"
+        style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(24,26,33,0.93);color:#00ffe0;font-size:30px;">
+        <div>Drop blueprint JSON here to load</div>
+    </div>
+
+    <div class="top-right-corner">
+        <button class="back-btn" onclick="window.location.href='/index.html'">BACK</button>
+    </div>
 
   <div id="drawflow"></div>
 
@@ -546,6 +639,339 @@
         return errors;
     }
 
+    const dropzone = document.getElementById("dropzone");
+
+    // Show dropzone on drag over
+    window.addEventListener("dragover", e => {
+    e.preventDefault();
+    dropzone.style.display = "flex";
+    });
+
+    // Hide dropzone on drag leave
+    window.addEventListener("dragleave", e => {
+    if (e.target === dropzone || e.clientY <= 0) {
+        dropzone.style.display = "none";
+    }
+    });
+
+    // Handle file drop
+    window.addEventListener("drop", e => {
+    e.preventDefault();
+    dropzone.style.display = "none";
+    const file = e.dataTransfer.files[0];
+    if (file && file.type === "application/json") {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+        try {
+            const json = JSON.parse(event.target.result);
+            if (confirm("Do you want to load this blueprint?")) {
+            loadBlueprint(json);
+            }
+        } catch (err) {
+            alert("❌ Failed to parse JSON file!" + err);
+        }
+        };
+        reader.readAsText(file);
+    } else if (file) {
+        alert("❌ Please drop a valid JSON file!");
+    }
+    });
+
+
+function exportBlueprint() {
+    // 1) Získame celý export (vrátane version!)
+    const fullExport = editor.export();
+
+    // 2) Zistíme meno súboru
+    const name = prompt("Ako sa má blueprint volať?", "MyBlueprint") || "MyBlueprint";
+
+    // 3) Vytvoríme payload
+    const payload = {
+        name: name,
+        drawflow: fullExport.drawflow,
+        version: fullExport.version || '1.0'
+    };
+
+    // 4) Serializujeme
+    const jsonStr = JSON.stringify(payload, null, 2);
+
+    // 5) Uložíme ako .json súbor
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function autofillNodeInputs() {
+    // Prejdi všetky nody v DOM (už nakreslené Drawflowom)
+    document.querySelectorAll('.drawflow-node').forEach(nodeEl => {
+        // Zisti ID nodu podľa id="node-<id>"
+        const nodeId = nodeEl.id.replace("node-", "");
+        // Nájdeš daný node v editori
+        let nodeObj = null;
+        try {
+            nodeObj = editor.getNodeFromId ? editor.getNodeFromId(nodeId) : null;
+        } catch (e) {}
+        // Alebo fallback: môžeš použiť posledný načítaný blueprint (tvoj patchedNodes)
+        // Ale jednoduchšie je uložiť si aktuálny blueprint do globálu počas importu
+
+        // Získaj hodnoty:
+        const data = nodeObj?.data || {};
+        // (alebo pre tvoju custom konverziu: patchedNodes[nodeId].data alebo .values)
+        // Ak načítavaš zo starého formátu, použij `patchedNodes[nodeId].data`
+
+        // Pre každý input/textarea/select v node, nastav hodnotu podľa mena (alebo labelu)
+        nodeEl.querySelectorAll('input, textarea, select').forEach(input => {
+            // Podľa názvu inputu a labelu vedľa neho nájdi kľúč v data
+            let key = input.previousElementSibling && input.previousElementSibling.tagName === "LABEL"
+                ? input.previousElementSibling.innerText.trim().toLowerCase().replace(/\W+/g, "_")
+                : (input.name || input.type || "input");
+
+            // Ak tam taký key je, nahraj hodnotu
+            if (key in data) {
+                if (input.type === "checkbox") {
+                    // Silno konvertuj na boolean
+                    let v = data[key];
+                    if (typeof v === "string") {
+                        v = v === true || v === "true" || v === "on";
+                    }
+                    input.checked = !!v;
+
+                } else if (input.type === "number" || input.type === "range") {
+                    input.value = Number(data[key]);
+                } else {
+                    input.value = data[key];
+                }
+            }
+        });
+    });
+}
+
+
+function loadBlueprint(json) {
+
+
+    let nodeInfo = {
+        "Start": {
+        html: `<div><h3>🖥️ Start</h3><label>Main Function!</label></div>`,
+        inputs: 0, outputs: 1, name: "Start"
+        },
+        "ScreenMelter": {
+        html: `<div><h3>🖥️ Screen Melter</h3><label>Strength</label><input type="range" min="1" max="10" value="5"></div>`,
+        inputs: 1, outputs: 1, name: "ScreenMelter"
+        },
+        "IfCond": {
+        html: `<div>
+            <h3>🖥️ IF</h3>
+            <label>Condition (Boolean Input)</label>
+            <div>(Wire variable-get or any boolean value here!)</div>
+            <div style="margin-top:12px;font-size:13px;">
+            <b>True:</b>TRUE<br>
+            <b>False:</b>FALSE
+            </div>
+        </div>`,
+        inputs: 2, // exec + value (boolean)
+        outputs: 2, // true, false
+        name: "IfCond"
+        },
+
+        "Variable": {
+        html: `<div>
+            <h3>📦 Variable</h3>
+            <label>Name</label>
+            <input type="text" value="myVar" class="var-name" style="width:90%" /><br>
+            <label>Type</label>
+            <select class="var-type" style="width:100%" onchange="this.parentElement.querySelector('.var-value').type=this.value=='boolean'?'checkbox':this.value">
+            <option value="boolean">Boolean</option>
+            <option value="string">String</option>
+            <option value="number">Number</option>
+            </select><br>
+            <label>Value</label>
+            <input class="var-value" type="checkbox" />
+        </div>`,
+        inputs: 0,
+        outputs: 0,
+        name: "Variable"
+        },
+
+        "VariableGet": {
+        html: `<div>
+            <h3>🔎 Get Variable</h3>
+            <label>Name</label>
+            <select class="var-get-name"></select>
+        </div>`,
+        inputs: 1,    // "exec" (when to get value)
+        outputs: 1,   // Value output (wired to IfCond or anything)
+        name: "VariableGet"
+        },
+
+        "VariableSet": {
+        html: `<div>
+            <h3>✏️ Set Variable</h3>
+            <label>Name</label>
+            <select class="var-set-name"></select><br>
+            <label>Value</label>
+            <input class="var-set-value" type="text" />
+        </div>`,
+        inputs: 2, // exec, and value (could be 1 and let value come from UI or wire)
+        outputs: 1, // exec out (for chaining)
+        name: "VariableSet"
+        },
+
+        "Ransomware": {
+        html: `<div>
+        <h3>🖥️ Ransomware</h3>
+        <label>Ransom Note</label><br>
+        <textarea rows="6" style="width:100%;background:#1a1a1a;color:#fff;border:1px solid #555;font-family:monospace;font-size:14px;">
+        Hello, this is RansomJokey.
+        Your files have been encrypted.
+
+        Pay $300 in BTC to get the decryption key.
+        You have 48 hours or your files are gone forever.
+        </textarea>
+        </div>`,
+        inputs: 1, outputs: 1, name: "Ransomware"
+        },
+        "TriggerBSOD": {
+        html: `<div><h3>💀 Trigger BSOD</h3><small>Instant crash</small></div>`,
+        inputs: 1, outputs: 1, name: "TriggerBSOD"
+        },
+        "PopupSpam": {
+        html: `<div><h3>⚠️ Popup Spam</h3><label>Count</label><input type="number" value="10" min="1"></div>`,
+        inputs: 1, outputs: 1, name: "PopupSpam"
+        },
+        "Keylogger": {
+        html: `<div><h3>⌨️ Keylogger</h3><label>To file:</label><input value="log.txt"></div>`,
+        inputs: 1, outputs: 1, name: "Keylogger"
+        },
+        "CryptoMiner": {
+        html: `<div><h3>⛏️ Crypto Miner</h3><label>Mining Power</label><input type="range" min="1" max="100" value="30"></div>`,
+        inputs: 1, outputs: 1, name: "CryptoMiner"
+        },
+        "PopupShow": {
+        html: `<div><h3>⛏️ Popup Messagebox</h3><label>Mining Power</label><input type="text" value="placeholder text"></div>`,
+        inputs: 1, outputs: 1, name: "PopupShow"
+        },
+        "RAT": {
+        html: `<div><h3>🐀 RAT Backdoor</h3><label>Server</label><input value="127.0.0.1"></div>`,
+        inputs: 1, outputs: 1, name: "RAT"
+        },
+        "Delay": {
+        html: `<div><h3>🕒 Delay</h3><label>Duration (s)</label><input type="number" value="2"></div>`,
+        inputs: 1, outputs: 1, name: "Delay"
+        },
+        "End": {
+        html: `<div><h3>🕒 Do nothing, end.</h3><label>End Node</label></div>`,
+        inputs: 1, outputs: 0, name: "End"
+        }
+    };
+
+    // Ak je už správny drawflow formát (obsahuje 'drawflow' a 'version'), importuj priamo
+    if (json.drawflow && json.version) {
+        editor.clear();
+        editor.import(json);
+        setTimeout(updateVariableDropdowns, 50);
+        return;
+    }
+
+    // Ak je to starý tvoj formát (obsahuje .blueprint)
+    if (json.blueprint) {
+        // PATCH: Preveď na Drawflow formát
+        const patchedNodes = {};
+        for (const [nodeId, node] of Object.entries(json.blueprint)) {
+            const idStr = String(nodeId);
+            // Priprav základné pole
+            const patched = {
+                id: idStr,
+                name: node.name,
+                class: node.class,
+                html: nodeInfo[node.name]?.html || `<div><h3>${node.name}</h3></div>`,
+                data: node.values || {},
+                typenode: false,
+                pos_x: node.pos_x || 0,
+                pos_y: node.pos_y || 0,
+                // Štruktúra inputs/outputs nižšie
+                inputs: {},
+                outputs: {}
+            };
+
+            // PATCH INPUTS (Drawflow chce: {input_1:{connections:[...]}})
+            for (const key in node.inputs || {}) {
+                patched.inputs[key] = {
+                    connections: (node.inputs[key] || []).map(conn => ({
+                        node: String(conn.node),
+                        input: conn.input
+                    }))
+                };
+            }
+            // PATCH OUTPUTS
+            for (const key in node.outputs || {}) {
+                patched.outputs[key] = {
+                    connections: (node.outputs[key] || []).map(conn => ({
+                        node: String(conn.node),
+                        output: conn.output
+                    }))
+                };
+            }
+
+            patchedNodes[idStr] = patched;
+        }
+
+        // Zabaľ do správneho drawflow tvaru
+        const drawflowFormat = {
+            drawflow: {
+                Home: {
+                    data: patchedNodes,
+                    position: { x: 0, y: 0, zoom: 1 }
+                }
+            },
+            version: "1.0"
+        };
+
+        // IMPORTUJ
+        try {
+            editor.clear();
+            editor.import(drawflowFormat);
+            setTimeout(() => {
+                autofillNodeInputs();
+                updateVariableDropdowns();
+                refreshAllVariablesFromDOM();
+            }, 60);  // dávam 60ms, nech je istota že DOM nody sú už pridané
+
+            setTimeout(updateVariableDropdowns, 50);
+        } catch (e) {
+            alert("❌ Failed to import blueprint!\n" + e.message);
+            console.error("Drawflow import error:", e, drawflowFormat);
+        }
+        return;
+    }
+
+    // Ak nič nesedí, fail
+    alert("Invalid or unsupported blueprint JSON!");
+}
+
+function refreshAllVariablesFromDOM() {
+    // Vynuluj allVariables
+    Object.keys(allVariables).forEach(k => delete allVariables[k]);
+    // Prejdi všetky Variable nody
+    document.querySelectorAll('.drawflow-node').forEach(el => {
+        if (el.querySelector('.var-name')) {
+            const name = el.querySelector('.var-name').value;
+            const type = el.querySelector('.var-type').value;
+            let value;
+            if (type === "boolean") value = el.querySelector('.var-value').checked;
+            else if (type === "number") value = parseFloat(el.querySelector('.var-value').value);
+            else value = el.querySelector('.var-value').value;
+            if (name) allVariables[name] = { type, value };
+        }
+    });
+    updateVariableDropdowns();
+}
   </script>
 </body>
 </html>
