@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Elite Z - Main Menu</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('theme.avif') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
+
+    .overlay {
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .title {
+      font-size: 4em;
+      margin-bottom: 50px;
+      color: #00fff7;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px #00fff7, 0 0 30px #ff00ff;
+      animation: flicker 2s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0%   { opacity: 1; text-shadow: 0 0 10px #00fff7, 0 0 30px #ff00ff; }
+      100% { opacity: 0.9; text-shadow: 0 0 20px #00fff7, 0 0 60px #ff00ff; }
+    }
+
+    .menu-button {
+      width: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 18px 30px;
+      margin: 12px 0;
+      font-size: 1.3em;
+      font-weight: 500;
+      color: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(255, 0, 180, 0.25);
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    }
+
+    .menu-button:hover {
+      transform: translateY(-5px) scale(1.05);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 30px rgba(255, 0, 180, 0.4);
+    }
+
+    .menu-button span.icon {
+      font-size: 1.5em;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 12px;
+      color: #ccc;
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="title">Elite Z</div>
+    <button class="menu-button" onclick="alert('Load malware builder...')">
+      <span class="icon">💻</span> Build Malware
+    </button>
+    <button class="menu-button" onclick="alert('View world infection map...')">
+      <span class="icon">🗺️</span> View World Map
+    </button>
+    <button class="menu-button" onclick="alert('Open hacker social network...')">
+      <span class="icon">📡</span> Hacker Network
+    </button>
+    <button class="menu-button" onclick="alert('Open mission log...')">
+      <span class="icon">📁</span> Mission Log
+    </button>
+    <button class="menu-button" onclick="alert('Launch simulation VM...')">
+      <span class="icon">🖥️</span> Virtual Machine
+    </button>
+    <button class="menu-button" onclick="alert('Exit game...')">
+      <span class="icon">🚪</span> Exit
+    </button>
+    <div class="footer">© 2025 Elite Hacker Studio | All Rights Controlled</div>
+  </div>
+</body>
+</html>

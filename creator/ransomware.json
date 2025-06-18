@@ -1,0 +1,65 @@
+{
+  "name": "ransomware",
+  "blueprint": {
+    "1": {
+      "id": 1,
+      "name": "Ransomware",
+      "class": "ransomware",
+      "values": {
+        "textarea": "        Hello, this is RansomJokey.\n        Your files have been encrypted.\n\n        Pay $300 in BTC to get the decryption key.\n        You have 48 hours or your files are gone forever.\n        "
+      },
+      "inputs": {
+        "input_1": [
+          {
+            "node": "2",
+            "input": "output_1"
+          }
+        ]
+      },
+      "outputs": {
+        "output_1": [
+          {
+            "node": "3",
+            "output": "input_1"
+          }
+        ]
+      },
+      "pos_x": 873,
+      "pos_y": 323
+    },
+    "2": {
+      "id": 2,
+      "name": "Start",
+      "class": "start",
+      "values": {},
+      "inputs": {},
+      "outputs": {
+        "output_1": [
+          {
+            "node": "1",
+            "output": "input_1"
+          }
+        ]
+      },
+      "pos_x": 570,
+      "pos_y": 462
+    },
+    "3": {
+      "id": 3,
+      "name": "End",
+      "class": "end",
+      "values": {},
+      "inputs": {
+        "input_1": [
+          {
+            "node": "1",
+            "input": "output_1"
+          }
+        ]
+      },
+      "outputs": {},
+      "pos_x": 1183,
+      "pos_y": 407
+    }
+  }
+}

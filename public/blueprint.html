@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Elite Z - Blueprint Editor</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/drawflow/dist/drawflow.min.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #1e1e1e;
+      font-family: 'Consolas', monospace;
+      height: 100vh;
+      overflow: hidden;
+      color: #dcdcdc;
+    }
+
+    #drawflow {
+      width: 100vw;
+      height: 100vh;
+      background-color: #1e1e1e;
+      background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    .drawflow-node {
+      background-color: #2b2b2b !important;
+      border: 2px solid #444;
+      border-radius: 6px;
+      color: #dcdcdc;
+      box-shadow: 0 0 6px #000;
+    }
+
+    .drawflow-node h3 {
+      margin: 4px;
+      font-size: 14px;
+      color: #87ceeb; /* UE4-style light cyan titles */
+    }
+
+    .drawflow-node input,
+    .drawflow-node select,
+    .drawflow-node textarea {
+      background: #1a1a1a;
+      border: 1px solid #555;
+      color: #dcdcdc;
+      width: 100%;
+      padding: 4px;
+      font-family: monospace;
+    }
+
+    .drawflow .connection .main-path {
+      stroke: #87ceeb;
+      stroke-width: 2px;
+    }
+  </style>
+</head>
+<body>
+    <div id="toolbox" style="position:fixed;top:10px;left:10px;z-index:99;background:#181a21cc;padding:14px 16px 10px 14px;border-radius:10px;box-shadow:0 3px 18px #000a">
+        <b style="color:#00ffe0">Toolbox:</b><br>
+        <button class="toolbox-btn" onclick="addBlueprintNode('Start')">+ Add Start Function</button><br>
+        <button class="toolbox-btn" onclick="addBlueprintNode('Variable')">+ Add Variable</button><br>
+        <button class="toolbox-btn" onclick="addBlueprintNode('VariableGet')">+ Get Variable</button><br>
+        <button class="toolbox-btn" onclick="addBlueprintNode('VariableSet')">+ Set Variable</button><br>
+        <button class="toolbox-btn" onclick="addBlueprintNode('IfCond')">+ Add If Condition</button><br>
+        <button class="toolbox-btn" onclick="addBlueprintNode('Ransomware')">+ Add Ransomware</button><br>
+        <button class="toolbox-btn" onclick="addBlueprintNode('ScreenMelter')">+ Add Screen Melter</button><br>
+        <button class="toolbox-btn" onclick="addBlueprintNode('TriggerBSOD')">+ Trigger BSOD</button><br>
+        <button class="toolbox-btn" onclick="addBlueprintNode('PopupSpam')">+ Popup Spam</button><br>
+        <button class="toolbox-btn" onclick="addBlueprintNode('PopupShow')">+ Popup Messagebox</button><br>
+        <button class="toolbox-btn" onclick="addBlueprintNode('Delay')">+ Delay</button><br>
+        <button class="toolbox-btn" onclick="addBlueprintNode('End')">+ End Node</button><br>
+        <button class="toolbox-btn" onclick="saveBlueprint()">💾 Save Blueprint</button>
+        <button class="toolbox-btn" onclick="runCurrentBlueprint()">▶️ Run Blueprint</button>
+
+    </div>
+    
+
+  <div id="drawflow"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/drawflow/dist/drawflow.min.js"></script>
+  <script>
+    const container = document.getElementById("drawflow");
+    const editor = new Drawflow(container);
+    editor.reroute = true;
+    editor.start();
+
+
+    console.log("✅ UE-style Blueprint Editor Ready");
+    const allVariables = {};
+
+    function addBlueprintNode(type) {
+    if (type === "Variable") {
+        setTimeout(() => {
+            // Find the last (newest) variable node only!
+            const nodes = document.querySelectorAll('.drawflow-node');
+            const el = nodes[nodes.length - 1];
+            const nameInput = el.querySelector('.var-name');
+            const typeInput = el.querySelector('.var-type');
+            const valueInput = el.querySelector('.var-value');
+
+            // Store the previous name for this node
+            let prevVarName = nameInput.value;
+
+            function updateVarMap() {
+                const varName = nameInput.value;
+                const varType = typeInput.value;
+                let varValue;
+                if (varType === "boolean") {
+                    varValue = valueInput.checked;
+                } else if (varType === "number") {
+                    varValue = parseFloat(valueInput.value) || 0;
+                } else {
+                    varValue = valueInput.value;
+                }
+
+                // Remove old variable if name changed
+                if (prevVarName && prevVarName !== varName && allVariables[prevVarName]) {
+                    delete allVariables[prevVarName];
+                }
+                if (varName) {
+                    allVariables[varName] = { type: varType, value: varValue };
+                }
+                prevVarName = varName;
+                updateVariableDropdowns();
+            }
+
+            nameInput.addEventListener('input', updateVarMap);
+            typeInput.addEventListener('change', () => {
+                valueInput.type = typeInput.value === "boolean" ? "checkbox" : typeInput.value;
+                updateVarMap();
+            });
+            valueInput.addEventListener('input', updateVarMap);
+            valueInput.addEventListener('change', updateVarMap);
+
+            // Initial setup
+            updateVarMap();
+        }, 20);
+    }
+
+    let nodeInfo = {
+        "Start": {
+        html: `<div><h3>🖥️ Start</h3><label>Main Function!</label></div>`,
+        inputs: 0, outputs: 1, name: "Start"
+        },
+        "ScreenMelter": {
+        html: `<div><h3>🖥️ Screen Melter</h3><label>Strength</label><input type="range" min="1" max="10" value="5"></div>`,
+        inputs: 1, outputs: 1, name: "ScreenMelter"
+        },
+        "IfCond": {
+        html: `<div>
+            <h3>🖥️ IF</h3>
+            <label>Condition (Boolean Input)</label>
+            <div>(Wire variable-get or any boolean value here!)</div>
+            <div style="margin-top:12px;font-size:13px;">
+            <b>True:</b>TRUE<br>
+            <b>False:</b>FALSE
+            </div>
+        </div>`,
+        inputs: 2, // exec + value (boolean)
+        outputs: 2, // true, false
+        name: "IfCond"
+        },
+
+        "Variable": {
+        html: `<div>
+            <h3>📦 Variable</h3>
+            <label>Name</label>
+            <input type="text" value="myVar" class="var-name" style="width:90%" /><br>
+            <label>Type</label>
+            <select class="var-type" style="width:100%" onchange="this.parentElement.querySelector('.var-value').type=this.value=='boolean'?'checkbox':this.value">
+            <option value="boolean">Boolean</option>
+            <option value="string">String</option>
+            <option value="number">Number</option>
+            </select><br>
+            <label>Value</label>
+            <input class="var-value" type="checkbox" />
+        </div>`,
+        inputs: 0,
+        outputs: 0,
+        name: "Variable"
+        },
+
+        "VariableGet": {
+        html: `<div>
+            <h3>🔎 Get Variable</h3>
+            <label>Name</label>
+            <select class="var-get-name"></select>
+        </div>`,
+        inputs: 1,    // "exec" (when to get value)
+        outputs: 1,   // Value output (wired to IfCond or anything)
+        name: "VariableGet"
+        },
+
+        "VariableSet": {
+        html: `<div>
+            <h3>✏️ Set Variable</h3>
+            <label>Name</label>
+            <select class="var-set-name"></select><br>
+            <label>Value</label>
+            <input class="var-set-value" type="text" />
+        </div>`,
+        inputs: 2, // exec, and value (could be 1 and let value come from UI or wire)
+        outputs: 1, // exec out (for chaining)
+        name: "VariableSet"
+        },
+
+        "Ransomware": {
+        html: `<div>
+        <h3>🖥️ Ransomware</h3>
+        <label>Ransom Note</label><br>
+        <textarea rows="6" style="width:100%;background:#1a1a1a;color:#fff;border:1px solid #555;font-family:monospace;font-size:14px;">
+        Hello, this is RansomJokey.
+        Your files have been encrypted.
+
+        Pay $300 in BTC to get the decryption key.
+        You have 48 hours or your files are gone forever.
+        </textarea>
+        </div>`,
+        inputs: 1, outputs: 1, name: "Ransomware"
+        },
+        "TriggerBSOD": {
+        html: `<div><h3>💀 Trigger BSOD</h3><small>Instant crash</small></div>`,
+        inputs: 1, outputs: 1, name: "TriggerBSOD"
+        },
+        "PopupSpam": {
+        html: `<div><h3>⚠️ Popup Spam</h3><label>Count</label><input type="number" value="10" min="1"></div>`,
+        inputs: 1, outputs: 1, name: "PopupSpam"
+        },
+        "Keylogger": {
+        html: `<div><h3>⌨️ Keylogger</h3><label>To file:</label><input value="log.txt"></div>`,
+        inputs: 1, outputs: 1, name: "Keylogger"
+        },
+        "CryptoMiner": {
+        html: `<div><h3>⛏️ Crypto Miner</h3><label>Mining Power</label><input type="range" min="1" max="100" value="30"></div>`,
+        inputs: 1, outputs: 1, name: "CryptoMiner"
+        },
+        "PopupShow": {
+        html: `<div><h3>⛏️ Popup Messagebox</h3><label>Mining Power</label><input type="text" value="placeholder text"></div>`,
+        inputs: 1, outputs: 1, name: "PopupShow"
+        },
+        "RAT": {
+        html: `<div><h3>🐀 RAT Backdoor</h3><label>Server</label><input value="127.0.0.1"></div>`,
+        inputs: 1, outputs: 1, name: "RAT"
+        },
+        "Delay": {
+        html: `<div><h3>🕒 Delay</h3><label>Duration (s)</label><input type="number" value="2"></div>`,
+        inputs: 1, outputs: 1, name: "Delay"
+        },
+        "End": {
+        html: `<div><h3>🕒 Do nothing, end.</h3><label>End Node</label></div>`,
+        inputs: 1, outputs: 0, name: "End"
+        }
+    };
+    let node = nodeInfo[type];
+    // Pridá nový node s menom, pozíciou random (alebo daj lepšie)
+    editor.addNode(node.name, node.inputs, node.outputs, 
+        80 + Math.random()*200, 100 + Math.random()*200, 
+        node.name.toLowerCase(), {}, node.html);
+
+        updateVariableDropdowns();
+
+    }
+
+    function runBlueprint(cleanBp) {
+        // 1. Find Start node
+        let startId = Object.keys(cleanBp).find(id => cleanBp[id].name === "Start");
+        if (!startId) return;
+
+        let currId = startId;
+        let runtimeVars = {};
+        let lastValue = undefined; // used to pass values between nodes
+
+        // Helper: get next nodeId by output index (default 0)
+        function getNextId(node, outIdx = 0) {
+            const outs = node.outputs && Object.values(node.outputs);
+            if (outs && outs[outIdx] && outs[outIdx][0])
+                return outs[outIdx][0].node;
+            return null;
+        }
+
+        // Helper: get connected nodeId for input idx
+        function getInputId(node, inputIdx = 0) {
+            const ins = node.inputs && Object.values(node.inputs);
+            if (ins && ins[inputIdx] && ins[inputIdx][0])
+                return ins[inputIdx][0].node;
+            return null;
+        }
+
+        // Helper: recursively evaluate a value input (for Get/Set/IfCond)
+        function evalInput(node, inputIdx = 1) {
+            let inputNodeId = getInputId(node, inputIdx);
+            if (!inputNodeId) return undefined;
+            let inputNode = cleanBp[inputNodeId];
+            if (!inputNode) return undefined;
+
+            if (inputNode.name === "Get Variable") {
+                let vName = inputNode.values && inputNode.values.name;
+                return runtimeVars[vName];
+            }
+            if (inputNode.name === "Set Variable") {
+                let vName = inputNode.values && inputNode.values.name;
+                let vValue = evalInput(inputNode, 1); // supports chaining
+                runtimeVars[vName] = vValue;
+                return vValue;
+            }
+            if (inputNode.name === "IfCond") {
+                // Recursively evaluate its branch
+                let cond = evalInput(inputNode, 1);
+                if (cond) return runNode(inputNode, 0); // TRUE branch
+                else     return runNode(inputNode, 1); // FALSE branch
+            }
+            // Could add: Constant node, Boolean node, etc.
+            return inputNode.values && inputNode.values.value;
+        }
+
+        // Init all variables before starting!
+        for (let id in cleanBp) {
+            let node = cleanBp[id];
+            if (node.name === "Variable") {
+                let vName = node.values && node.values.name;
+                let vType = node.values && node.values.type;
+                let vValue = node.values && node.values.value;
+                if (vType === "boolean") vValue = vValue === "on" || vValue === true || vValue === "true";
+                else if (vType === "number") vValue = parseFloat(vValue) || 0;
+                runtimeVars[vName] = vValue;
+            }
+        }
+
+
+        // Main executor for a node, with output branch (for IfCond)
+        function runNode(node, outIdx = 0) {
+            switch (node.name) {
+                case "Set Variable": {
+                    let vName = node.values && node.values.name;
+                    let vValue = evalInput(node, 1); // get value from input 1 (Value)
+                    runtimeVars[vName] = vValue;
+                    // Continue to next node (output 0)
+                    let nextId = getNextId(node, 0);
+                    if (nextId) runNode(cleanBp[nextId]);
+                    break;
+                }
+                case "Get Variable": {
+                    // Just pass its value to next
+                    let vName = node.values && node.values.name;
+                    let value = runtimeVars[vName];
+                    let nextId = getNextId(node, 0);
+                    if (nextId) runNode(cleanBp[nextId]);
+                    return value;
+                }
+                case "IfCond": {
+                    // input 1 is the boolean value to check
+                    let cond = evalInput(node, 1);
+                    let branch = cond ? 0 : 1; // 0 = TRUE, 1 = FALSE
+                    let nextId = getNextId(node, branch);
+                    if (nextId) runNode(cleanBp[nextId]);
+                    break;
+                }
+                case "Start": {
+                    let nextId = getNextId(node, 0);
+                    if (nextId) runNode(cleanBp[nextId]);
+                    break;
+                }
+                default: {
+                    // Other nodes: just follow output 0
+                    let nextId = getNextId(node, outIdx);
+                    if (nextId) runNode(cleanBp[nextId]);
+                    break;
+                }
+            }
+        }
+
+        // --- Start execution from Start node ---
+        runNode(cleanBp[startId]);
+        return runtimeVars; // (optional, for debugging)
+    }
+
+    function runCurrentBlueprint() {
+        let clean = getCleanBlueprint(editor);
+        let logicErrors = checkBlueprintLogic(clean);
+        if (logicErrors.length) {
+            alert("❌ Logic Error:\n" + logicErrors.join('\n'));
+            return;
+        }
+        alert("✅ Logic is OK and ready to run!");
+        runBlueprint(clean);
+    }
+
+
+    function updateVariableDropdowns() {
+    // For Get Variable
+    document.querySelectorAll('.var-get-name').forEach(select => {
+        const currentVal = select.value;
+        select.innerHTML = Object.keys(allVariables)
+        .map(name => `<option value="${name}">${name}</option>`).join('');
+        if (allVariables[currentVal]) select.value = currentVal;
+    });
+
+    // For Set Variable
+    document.querySelectorAll('.var-set-name').forEach(select => {
+        const currentVal = select.value;
+        select.innerHTML = Object.keys(allVariables)
+        .map(name => `<option value="${name}">${name}</option>`).join('');
+        if (allVariables[currentVal]) select.value = currentVal;
+        // Update value input type based on variable type
+        const node = select.closest('.drawflow-node');
+        if (node) {
+        const valueInput = node.querySelector('.var-set-value');
+        if (allVariables[select.value]) {
+            const t = allVariables[select.value].type;
+            valueInput.type = t === "boolean" ? "checkbox" : t;
+        }
+        }
+        select.onchange = function () {
+        const node = select.closest('.drawflow-node');
+        const valueInput = node.querySelector('.var-set-value');
+        if (allVariables[select.value]) {
+            const t = allVariables[select.value].type;
+            valueInput.type = t === "boolean" ? "checkbox" : t;
+            // Reset value to current var value
+            if (t === "boolean") valueInput.checked = !!allVariables[select.value].value;
+            else valueInput.value = allVariables[select.value].value || "";
+        }
+        }
+    });
+    }
+
+
+    function saveBlueprint() {
+        let virusName = prompt("Name your virus:", "MyEpicVirus");
+        if (!virusName) return;
+
+        let clean = getCleanBlueprint(editor);
+        let logicErrors = checkBlueprintLogic(clean);
+        if (logicErrors.length) {
+            alert("❌ Compile error:\n" + logicErrors.join('\n'));
+            return;
+        }
+
+        fetch('/save-blueprint', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+            name: virusName,
+            blueprint: clean
+            })
+        })
+        .then(res => res.json())
+        .then(resp => {
+            if(resp.success){
+            alert("✅ Virus saved as " + virusName + ".json!");
+            } else {
+            alert("❌ Save failed: " + resp.error);
+            }
+        })
+        .catch(err => alert("❌ Network/server error: " + err));
+    }
+
+
+    function getCleanBlueprint(editor) {
+        const data = editor.export().drawflow.Home.data;
+        let result = {};
+        for (let nodeId in data) {
+            let node = data[nodeId];
+
+            // Najdi DOM node podľa id (Drawflow dáva id="node-{id}")
+            const domNode = document.querySelector(`#node-${nodeId}`);
+            let inputValues = {};
+
+            if(domNode) {
+                // Prejdi všetky inputy, textarea, select v node
+                domNode.querySelectorAll('input, textarea, select').forEach(input => {
+                    let key = input.previousElementSibling && input.previousElementSibling.tagName === "LABEL"
+                        ? input.previousElementSibling.innerText.trim().toLowerCase().replace(/\W+/g, "_")
+                        : (input.name || input.type || "input");
+                    // Fix for boolean: save true/false, not "on"
+                    if (input.type === "checkbox") {
+                        inputValues[key] = input.checked;
+                    } else {
+                        inputValues[key] = input.value;
+                    }
+                });
+            }
+
+            // connections
+            let outputs = {};
+            for (let outKey in node.outputs) {
+                outputs[outKey] = node.outputs[outKey].connections.map(conn => ({
+                    node: conn.node,
+                    output: conn.output
+                }));
+            }
+            let inputs = {};
+            for (let inKey in node.inputs) {
+                inputs[inKey] = node.inputs[inKey].connections.map(conn => ({
+                    node: conn.node,
+                    input: conn.input
+                }));
+            }
+
+            result[nodeId] = {
+                id: node.id,
+                name: node.name,
+                class: node.class,
+                values: inputValues,   // <--- Toto obsahuje reálne zadané hodnoty!
+                inputs,
+                outputs,
+                pos_x: node.pos_x,
+                pos_y: node.pos_y
+            };
+        }
+        return result;
+    }
+
+    function checkBlueprintLogic(cleanBp) {
+        let errors = [];
+        for (let id in cleanBp) {
+            const n = cleanBp[id];
+
+            // These node types do not need input/output checks
+            const skipInput = ["Start", "InputKey", "Variable"];
+            const skipOutput = ["End", "TriggerBSOD", "Variable", "VariableGet", "VariableSet"];
+
+            // Input: skip for some types
+            if (
+                !Object.values(n.inputs).some(conns => conns.length > 0)
+                && !skipInput.includes(n.name)
+            ) {
+                errors.push(`Node ${n.name} (#${id}) is not connected to any input`);
+            }
+
+            // Output: skip for some types
+            if (
+                !Object.values(n.outputs).some(conns => conns.length > 0)
+                && !skipOutput.includes(n.name)
+            ) {
+                errors.push(`Node ${n.name} (#${id}) does not output to any node`);
+            }
+
+            // IfCond can have only one or zero outputs, that's fine
+            if (n.name === "IfCond") {
+                // Do not error if only one branch is connected
+                // (Handled above by skipOutput)
+            }
+        }
+        return errors;
+    }
+
+  </script>
+</body>
+</html>

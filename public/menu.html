@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Elite Z - Menu</title>
+  <link rel="stylesheet" href="menu.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">ELITE Z</h1>
+    <button class="menu-button" onclick="startGame()">Start</button>
+    <button class="menu-button" onclick="openSettings()">Settings</button>
+    <button class="menu-button" onclick="showCredits()">Credits</button>
+  </div>
+
+  <script>
+    function startGame() {
+      location.href = "index.html"; // real redirect
+    }
+
+    function openSettings() {
+      alert("⚙️ Settings not implemented yet.");
+    }
+
+    function showCredits() {
+      alert("👤 Created by EliteDev.");
+    }
+  </script>
+</body>
+</html>

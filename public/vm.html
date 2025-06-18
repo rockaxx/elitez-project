@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Elite Z - Sandbox OS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/winbox/dist/winbox.min.css">
+  <!-- do <head> -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: url('https://www.pixelstalk.net/wp-content/uploads/2016/06/Minimalist-Backgrounds.png') no-repeat center center fixed;
+      background-size: cover;
+      color:white;
+    }
+    .desktop {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    .icon {
+      position: absolute;
+      width: 76px;
+      text-align: center;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      filter: drop-shadow(0 1px 2px #0008);
+      user-select: none;
+    }
+    .icon img {
+      width: 56px;
+      height: 56px;
+      margin-bottom: 2px;
+      margin-top: 6px;
+    }
+    /* Taskbar */
+    .taskbar {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      height: 48px;
+      background: rgba(24,24,28,0.93);
+      display: flex;
+      align-items: center;
+      z-index: 1000;
+      border-top: 1px solid #2225;
+      box-shadow: 0 -2px 8px #0005;
+    }
+    .start-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 7px;
+      margin: 0 8px;
+      background: none;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: background .15s;
+    }
+    .start-btn:hover {
+      background: rgba(80,80,90,0.25);
+    }
+    .clock {
+      margin-left: auto;
+      color: #fff;
+      font-size: 15px;
+      padding-right: 20px;
+      letter-spacing: 1px;
+      text-shadow: 0 1px 2px #0006;
+    }
+    .wb-body {
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color:white;
+    }
+
+#virus-select {
+  background: #232838 !important;
+  color: #fff !important;
+  border-radius: 7px !important;
+  border: 1px solid #333 !important;
+  outline: none !important;
+  font-size: 15px !important;
+}
+#virus-select option {
+  background: #232838;
+  color: #fff;
+}
+
+  </style>
+</head>
+<body>
+  <div class="desktop">
+    <div class="icon" style="top: 42px; left: 32px;" onclick="openExplorer()">
+      <img src="https://icons.iconarchive.com/icons/icojam/blue-bits/256/folder-icon.png">
+      <div>Explorer</div>
+    </div>
+    <div class="icon" style="top: 142px; left: 32px;" onclick="openTerminal()">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b3/Terminalicon2.png">
+      <div>Terminal</div>
+    </div>
+    <div class="icon" style="top: 242px; left: 32px;" onclick="runVirus()">
+      <img src="https://icons.iconarchive.com/icons/paomedia/small-n-flat/256/sign-warning-icon.png">
+      <div>Run Virus</div>
+    </div>
+    <div class="icon" style="top: 342px; left: 32px;" onclick="openManager()">
+      <img src="https://cdn-icons-png.flaticon.com/512/115/115893.png">
+      <div>Open Manager</div>
+    </div>
+    <div class="icon" style="top: 442px; left: 32px;" onclick="openNotepad('hello.txt')">
+      <img src="https://cdn-icons-png.flaticon.com/512/8243/8243060.png">
+      <div>hello.txt</div>
+    </div>
+    <div class="icon" style="top: 542px; left: 32px;" onclick="openNotepad('secret.txt')">
+      <img src="https://cdn-icons-png.flaticon.com/512/8243/8243060.png">
+      <div>secret.txt</div>
+    </div>
+    <!-- Taskbar -->
+    <div class="taskbar">
+      <button class="start-btn" onclick="showStartMenu()">
+        <img src="pngwing.com.png" style="width:30px;filter:drop-shadow(0 1px 2px #0009)">
+      </button>
+      <div class="clock" id="clock"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/winbox"></script>
+  <script>
+    // Real Windows-like clock
+    function updateClock() {
+      const d = new Date();
+      document.getElementById("clock").textContent =
+        d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + "  " +
+        d.toLocaleDateString();
+    }
+    setInterval(updateClock, 1000); updateClock();
+
+    function openExplorer() {
+      new WinBox({
+        title: 'File Explorer',
+        icon: 'https://icons.iconarchive.com/icons/icojam/blue-bits/256/folder-icon.png',
+        x: "center", y: "center", width: 420, height: 320,
+        html: `<div style='padding:12px;font-size:16px;'><b>Documents</b><br>
+        <span style='color:#555'>resume.docx</span><br>
+        <span style='color:#555'>notes.txt</span><br>
+        <span style='color:#555'>secret.jpg</span><br></div>`
+      });
+    }
+
+    function openTerminal() {
+    const box = new WinBox({
+        title: 'Terminal',
+        icon: 'https://upload.wikimedia.org/wikipedia/commons/b/b3/Terminalicon2.png',
+        x: "right", y: "center",
+        width: 500, height: 260,
+        mount: document.createElement("div")
+    });
+
+    // Vložíme obsah dovnútra
+    box.body.innerHTML = `
+        <div style="padding:13px; color:#6f6; font-family:monospace; font-size:15px;">
+        <span style='color:#aaa'>C:\\Users\\User&gt;</span> <span style='color:#fff'>run malware.exe</span><br>
+        Encrypting files...<br>
+        <span style='color:#c33'>Success. 💀</span>
+        </div>
+    `;
+
+    // Upravíme štýl `.wb-body` na glass efekt
+    box.body.style.background = "rgba(0, 0, 0, 0.8)";
+    box.body.style.backdropFilter = "blur(12px)";
+    box.body.style.webkitBackdropFilter = "blur(12px)";
+    box.body.style.borderRadius = "10px";
+    box.body.style.border = "1px solid rgba(255,255,255,0.1)";
+    }
+
+    function runVirus() {
+      for (let i = 0; i < 10; i++) {
+        new WinBox({
+          title: "WARNING",
+          icon: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/256/sign-warning-icon.png",
+          x: Math.random() * (window.innerWidth - 320) + "px",
+          y: Math.random() * (window.innerHeight - 180 - 48) + "px",
+          width: 320, height: 120,
+          html: `<div style='padding:15px;color:#c00;font-size:18px;font-weight:bold;text-align:center;'>
+                  Virus Detected!
+                 </div>`
+        });
+      }
+    }
+
+    function openNotepad(filename) {
+    let content = "";
+
+    if (filename === "hello.txt") {
+        content = `
+        <textarea style="width:100%;height:100%;background:#232838;color:#fff;border:none;font-family:monospace;font-size:14px;resize:none;outline:none;">
+    This is a HELLO message!
+        </textarea>`;
+    } else if (filename === "secret.txt") {
+        content = `
+        <textarea style="width:100%;height:100%;background:#232838;color:#fff;border:none;font-family:monospace;font-size:14px;resize:none;outline:none;">
+    This is a secret file. Only you can see this.
+        </textarea>`;
+    } else {
+        content = `
+        <div style="padding:20px;color:#aaa;font-size:16px;">
+            This notepad is empty. You can create new files or edit existing ones.
+        </div>`;
+    }
+
+    const box = new WinBox({
+        title: filename,
+        icon: "https://cdn-icons-png.flaticon.com/512/8243/8243060.png",
+        x: "center", y: "center", width: 400, height: 300,
+        mount: document.createElement("div"),
+        background: "#181818cc"
+    });
+
+    box.body.innerHTML = content;
+    box.body.style.background = "rgba(20, 20, 32, 0.85)";
+    box.body.style.backdropFilter = "blur(14px)";
+    box.body.style.webkitBackdropFilter = "blur(14px)";
+    }
+
+    async function openManager() {
+    try {
+        const response = await fetch('/allCreatorFiles');
+        const files = await response.json();
+
+        const virusList = files.map(f => f.name + ".exe");
+
+        const options = [
+            { label: "Silent mode", key: "silent", checked: false, tooltip: "No popups, runs hidden." },
+            { label: "Simulate persistence", key: "persist", checked: true, tooltip: "Virus survives reboot." },
+            { label: "Network worm", key: "worm", checked: false, tooltip: "Try to spread to other VMs." }
+        ];
+
+        let html = `<div style="padding:16px;">
+            <div style="font-size:19px;margin-bottom:12px;">Select viruses to run:</div>
+            <form id="virus-select-form">`;
+
+        html += `
+        <select id="virus-select" style="width:100%;padding:7px 6px;font-size:15px;background:#232838;color:#fff;border-radius:7px;border:1px solid #333;outline:none;margin-bottom:16px;">
+            ${virusList.map(name => `<option value="${name}">${name}</option>`).join("")}
+        </select>
+        `;
+
+
+
+        html += `</form>
+            <div style="font-size:17px;margin:18px 0 6px;">Options:</div>`;
+
+        options.forEach(opt => {
+            html += `<label title="${opt.tooltip}" style="display:block;margin-bottom:7px;">
+            <input type="checkbox" name="option" value="${opt.key}" ${opt.checked?"checked":""}/>
+            <span>${opt.label}</span>
+            </label>`;
+        });
+
+        html += `<button id="runTestBtn" style="margin-top:17px;font-size:16px;padding:7px 22px;
+            border-radius:7px;border:none;background:#00ffe0;color:#181818;font-weight:bold;cursor:pointer;box-shadow:0 2px 12px #00ffe055;">Run Test</button>
+            <div style="margin-top:18px;color:#aaa;font-size:13px;">
+            <b>Tips:</b><br>
+            - Click to select multiple viruses<br>
+            - \"Silent mode\" disables warning popups<br>
+            - Try combining worm & persist for crazy results!
+            </div>
+            </div>`;
+
+        const box = new WinBox({
+            title: "Manager",
+            icon: "https://cdn-icons-png.flaticon.com/512/151/151917.png",
+            x: "center",
+            y: "center",
+            width: 370,
+            height: 470,
+            mount: document.createElement("div"),
+            background: "#181818cc"
+        });
+
+        box.body.innerHTML = html;
+        box.body.style.background = "rgba(20, 20, 32, 0.85)";
+        box.body.style.backdropFilter = "blur(14px)";
+        box.body.style.webkitBackdropFilter = "blur(14px)";
+        box.body.style.borderRadius = "12px";
+
+
+        box.body.querySelector('#runTestBtn').onclick = async function() {
+            const selected = [box.body.querySelector('#virus-select').value];
+            if (!selected.length) return alert("No virus selected!");
+            // Odstráň .exe koncovku
+            const fname = selected[0].replace(/\.exe$/, "");
+            try {
+                const res = await fetch(`/creator/${fname}`);
+                const blueprintObj = await res.json();
+                if (!blueprintObj.blueprint) throw "No blueprint data!";
+
+                // Spusti simuláciu podľa blueprintu
+                simulateVirusBlueprint(blueprintObj.blueprint);
+
+            } catch (e) {
+                alert("Failed to load virus: " + e);
+            }
+        };
+
+        } catch (err) {
+            console.error("❌ Failed to fetch viruses:", err);
+            alert("Failed to load viruses from server.");
+        }
+    }
+
+    function simulateVirusBlueprint(blueprint) {
+    // Find Start node
+    let startId = Object.keys(blueprint).find(id => blueprint[id].name === "Start");
+    if (!startId) return alert("No Start node!");
+
+    // Gather all variable initial values
+    let vars = {};
+    Object.values(blueprint).forEach(n => {
+        if (n.name === "Variable") {
+            let v = n.values || {};
+            if (v.type === "boolean")
+                vars[v.name] = (v.value === "true" || v.value === true || v.value === "on");
+            else if (v.type === "number")
+                vars[v.name] = Number(v.value);
+            else
+                vars[v.name] = v.value;
+        }
+    });
+
+    function nextStep(id, prevValue) {
+        const node = blueprint[id];
+        if (!node) return;
+
+        // Efekt podľa typu node
+        switch (node.name) {
+            case "VariableGet": {
+                let vname = node.values && node.values.name;
+                let value = vars[vname];
+                // Go to next node (output_1)
+                const out = node.outputs.output_1?.[0]?.node;
+                if (out) nextStep(out, value); // Pass value to next node
+                console.log('Step:', node.name, 'prevValue:', prevValue, 'vars:', JSON.stringify(vars));
+
+                break;
+            }
+            case "VariableSet": {
+                let vname = node.values && node.values.name;
+                // Try to get value from input_2 (data input)
+                let value = prevValue;
+                if (node.inputs && node.inputs.input_2 && node.inputs.input_2.length > 0) {
+                    let inputNodeId = node.inputs.input_2[0].node;
+                    let inputNode = blueprint[inputNodeId];
+                    // For now just support VariableGet etc.
+                    if (inputNode && inputNode.name === "VariableGet") {
+                        value = vars[inputNode.values.name];
+                    }
+                } else if (typeof node.values.value !== "undefined") {
+                    value = node.values.value;
+                }
+                vars[vname] = value;
+                const out = node.outputs.output_1?.[0]?.node;
+                if (out) nextStep(out, value);
+                console.log('Step:', node.name, 'prevValue:', prevValue, 'vars:', JSON.stringify(vars));
+                break;
+            }
+
+
+            case "IfCond": {
+                let cond = prevValue;
+                let nextBranch = cond ? "output_1" : "output_2";
+                const out = node.outputs[nextBranch]?.[0]?.node;
+                if (out) nextStep(out, cond); // Pass condition value to branch
+                console.log('Step:', node.name, 'prevValue:', prevValue, 'vars:', JSON.stringify(vars));
+
+                break;
+            }
+            case "Delay":
+                let ms = 1000;
+                if (node.values && Object.keys(node.values).length)
+                    ms = Number(node.values[Object.keys(node.values)[0]]) * 1000;
+                setTimeout(() => {
+                    const out = node.outputs.output_1?.[0]?.node;
+                    if (out) nextStep(out, prevValue);
+                }, ms);
+                console.log('Step:', node.name, 'prevValue:', prevValue, 'vars:', JSON.stringify(vars));
+
+                break;
+
+            case "TriggerBSOD":
+                fakeBSOD();
+                break;
+
+            case "PopupShow":
+                // Tu získaj message z values (u teba je to v "mining_power" podľa toho, čo je v node.values)
+                const msg =
+                    (node.values && (node.values.text || node.values.message || node.values.mining_power))
+                    || "Malware activity detected!";
+                popupShowMalware(msg);
+
+                // pokračuj na ďalší node, ak existuje
+                setTimeout(() => {
+                    const out = node.outputs.output_1?.[0]?.node;
+                    if (out) nextStep(out, prevValue);
+                }, 500);
+                console.log('Step:', node.name, 'prevValue:', prevValue, 'vars:', JSON.stringify(vars));
+
+                break;
+
+            case "ScreenMelter":
+                screenMelterMalware();
+                break;
+
+            case "Ransomware":
+                const msgRansom =
+                    (node.values && (node.values.textarea||node.values.text || node.values.message || node.values.mining_power))
+                    || "Ransomware message!";
+                RansomwareMalware(msgRansom);
+
+                // pokračuj na ďalší node, ak existuje
+                setTimeout(() => {
+                    const out = node.outputs.output_1?.[0]?.node;
+                    if (out) nextStep(out, prevValue);
+                }, 500);
+                break;
+
+            case "PopupSpam":
+                let count = node.values && Object.keys(node.values).length
+                    ? Number(node.values[Object.keys(node.values)[0]]) : 5;
+                for (let i = 0; i < count; i++) setTimeout(fakePopup, 350 * i);
+                // pokračuj na ďalší node po poslednom popup
+                setTimeout(() => {
+                    const out = node.outputs.output_1?.[0]?.node;
+                    if (out) nextStep(out, prevValue);
+                }, 350 * count);
+                break;
+            // Tu pridaj ďalšie efekty (Keylogger, CryptoMiner, RAT, ...)
+            default:
+                // Ak node nie je terminálny, pokračuj
+                const out = node.outputs.output_1?.[0]?.node;
+                if (out) nextStep(out, prevValue);
+        }
+    }
+
+    const firstOut = blueprint[startId].outputs.output_1?.[0]?.node;
+    if (firstOut) nextStep(firstOut, undefined);
+    }
+
+
+
+    function popupShowMalware(message) {
+        new WinBox({
+            title: "Malware Alert",
+            icon: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/256/sign-warning-icon.png",
+            x: Math.random() * (window.innerWidth - 320) + "px",
+            y: Math.random() * (window.innerHeight - 180 - 48) + "px",
+            width: 320, height: 120,
+            html: `<div style='padding:15px;color:#c00;font-size:18px;font-weight:bold;text-align:center;'>
+                    ${message || "Malware activity detected!"}
+                </div>`
+        });
+    }
+
+    function RansomwareMalware(message) {
+        // 1. Set ransomware background
+        document.body.style.background = `url('https://brocku.ca/brock-news/wp-content/uploads/2022/10/Access-Denied-GettyImages-1291279260-1600x1067.jpg?x56978') no-repeat center center fixed`;
+        document.body.style.backgroundSize = 'cover';
+
+        // 2. Replace icon text with 12 random Chinese chars
+        document.querySelectorAll('.icon div:last-child').forEach(el => {
+            el.textContent = Array.from({ length: 8 }, () =>
+                String.fromCharCode(0x4e00 + Math.floor(Math.random() * 1000))
+            ).join('');
+        });
+
+        // 3. Override openNotepad to always show encrypted message
+        window.openNotepad = function (filename) {
+            new WinBox({
+                title: "unknown.???",
+                icon: "https://cdn-icons-png.flaticon.com/512/8243/8243060.png",
+                x: "center", y: "center", width: 400, height: 300,
+                background: "#181818cc",
+                html: `
+                <textarea style="width:100%;height:100%;background:#232838;color:#fff;border:none;font-family:monospace;font-size:14px;resize:none;outline:none;">
+    YOUR FILES ARE ENCRYPTED, NOW PAY
+                </textarea>`
+            });
+        };
+
+        // 4. Show ransom popup
+        const ransomNote = message || "Your files have been encrypted! Pay $300 in BTC to get the decryption key.";
+        new WinBox({
+            title: "Ransomware Alert",
+            icon: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/256/sign-warning-icon.png",
+            x: Math.random() * (window.innerWidth - 320) + "px",
+            y: Math.random() * (window.innerHeight - 180 - 48) + "px",
+            width: 320, height: 200,
+            html: `<div style='padding:15px;color:#c00;font-size:18px;font-weight:bold;text-align:center;'>
+                ${ransomNote}
+            </div>`
+        });
+    }
+
+    function screenMelterMalware(duration = 5000) {
+    if (document.getElementById("screen-melter-canvas")) return;
+
+    html2canvas(document.body).then(canvas => {
+        // Create overlay canvas
+        const meltCanvas = document.createElement('canvas');
+        meltCanvas.id = "screen-melter-canvas";
+        meltCanvas.width = canvas.width;
+        meltCanvas.height = canvas.height;
+        Object.assign(meltCanvas.style, {
+            position: "fixed",
+            top: 0, left: 0,
+            width: "100vw", height: "100vh",
+            zIndex: 99999,
+            pointerEvents: "none"
+        });
+        document.body.appendChild(meltCanvas);
+
+        const ctx = meltCanvas.getContext("2d");
+        ctx.drawImage(canvas, 0, 0);
+
+        // Melting setup
+        const columns = Math.floor(canvas.width / 10);
+        const meltOffsetsDown = Array(columns).fill(0);
+        const meltOffsetsUp = Array(columns).fill(0);
+        // Each column randomly melts up or down, or both
+        const meltDir = Array.from({length: columns}, () =>
+            Math.random() < 0.5 ? "down" : (Math.random() < 0.5 ? "up" : "both"));
+
+        let start = null;
+        function meltFrame(ts) {
+            if (!start) start = ts;
+            const progress = ts - start;
+
+            // Update melt offsets
+            for (let i = 0; i < columns; i++) {
+                if (meltDir[i] === "down" || meltDir[i] === "both") {
+                    meltOffsetsDown[i] += Math.random() * 8 + 4;
+                    if (meltOffsetsDown[i] > canvas.height) meltOffsetsDown[i] = canvas.height;
+                }
+                if (meltDir[i] === "up" || meltDir[i] === "both") {
+                    meltOffsetsUp[i] += Math.random() * 8 + 4;
+                    if (meltOffsetsUp[i] > canvas.height) meltOffsetsUp[i] = canvas.height;
+                }
+            }
+
+            // 1. Draw base
+            ctx.globalAlpha = 0.0;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(canvas, 0, 0);
+
+            // 2. Draw melted streaks
+            for (let i = 0; i < columns; i++) {
+                let x = i * 10, w = 10;
+                // Melt Down
+                let yD = meltOffsetsDown[i];
+                if (yD > 0) {
+                    ctx.globalAlpha = 0.68;
+                    ctx.drawImage(canvas, x, 0, w, yD, x, canvas.height - yD, w, yD);
+                    // Random color overlay
+                    ctx.globalAlpha = 0.21;
+                    ctx.fillStyle = randomColor();
+                    ctx.fillRect(x, canvas.height - yD, w, yD);
+                }
+                // Melt Up
+                let yU = meltOffsetsUp[i];
+                if (yU > 0) {
+                    ctx.globalAlpha = 0.62;
+                    ctx.drawImage(canvas, x, canvas.height - yU, w, yU, x, 0, w, yU);
+                    // Color overlay
+                    ctx.globalAlpha = 0.18;
+                    ctx.fillStyle = randomColor();
+                    ctx.fillRect(x, 0, w, yU);
+                }
+            }
+            ctx.globalAlpha = 1.0;
+
+            // Repeat or finish
+            if (progress < duration) {
+                requestAnimationFrame(meltFrame);
+            } else {
+                document.body.removeChild(meltCanvas);
+                fakeBSOD();
+            }
+        }
+        requestAnimationFrame(meltFrame);
+    });
+
+    // Helper: Random R/G/B streak color
+    function randomColor() {
+        const pick = [
+            `rgba(255,32,32,${Math.random()*0.4+0.18})`,
+            `rgba(32,255,32,${Math.random()*0.4+0.18})`,
+            `rgba(32,32,255,${Math.random()*0.4+0.18})`
+        ];
+        return pick[Math.floor(Math.random()*pick.length)];
+    }
+}
+
+
+    // Fake efekty pre VM
+    function fakeBSOD() {
+        // Prevent duplicitné BSOD
+        if (document.getElementById("fake-bsod-overlay")) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = "fake-bsod-overlay";
+        overlay.style.position = "fixed";
+        overlay.style.top = 0;
+        overlay.style.left = 0;
+        overlay.style.width = "100vw";
+        overlay.style.height = "100vh";
+        overlay.style.background = "#002689";
+        overlay.style.color = "#fff";
+        overlay.style.zIndex = 99999;
+        overlay.style.display = "flex";
+        overlay.style.flexDirection = "column";
+        overlay.style.alignItems = "center";
+        overlay.style.justifyContent = "center";
+        overlay.style.fontFamily = "Segoe UI, monospace";
+        overlay.innerHTML = `
+            <div style="text-align:center;max-width:90vw;">
+            <div style="font-size:80px;line-height:1;margin-bottom:12px;">:(</div>
+            <div style="font-size:29px;margin-bottom:28px;">
+                Your PC ran into a problem and needs to restart.<br>
+                We're just collecting some error info, and then we'll restart for you.<br><br>
+                <span style="font-size:21px;">If you'd like to know more, you can search online later for this error: <b>FAKE_BSOD</b></span>
+            </div>
+            <button onclick="location.reload()" style="padding:12px 48px;font-size:23px;border-radius:9px;border:none;background:#fff;color:#002689;font-weight:bold;box-shadow:0 3px 30px #0008;cursor:pointer;margin-top:30px;">Restart PC</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+
+    function fakePopup() {
+        new WinBox({
+            title: "WARNING",
+            width: 320,
+            height: 120,
+            x: Math.random() * (window.innerWidth - 320),
+            y: Math.random() * (window.innerHeight - 180 - 48),
+            background: "#232838",
+            html: `<div style="padding:25px;font-size:19px;color:#ff4444;text-align:center;">Malware activity detected!</div>`
+        });
+    }
+
+
+    function showStartMenu() {
+      new WinBox({
+        title: "Start Menu",
+        icon: "https://upload.wikimedia.org/wikipedia/commons/4/48/Windows_logo_-_2012.svg",
+        x: 30, y: window.innerHeight - 400,
+        width: 260, height: 330,
+        html: `<div style='padding:16px;'>
+                <div style='margin:12px 0;font-size:17px;cursor:pointer;' onclick='openExplorer()'>📁 File Explorer</div>
+                <div style='margin:12px 0;font-size:17px;cursor:pointer;' onclick='openTerminal()'>🖥️ Terminal</div>
+                <div style='margin:12px 0;font-size:17px;cursor:pointer;' onclick='runVirus()'>⚠️ Run Virus</div>
+               </div>`
+      });
+    }
+  </script>
+
+<script>
+  const wallpapers = [
+    'https://wallpapers.com/images/hd/cute-simple-aesthetic-desktop-5120-x-2880-war0w065r59ldpzr.jpg',
+    'https://wallpapercave.com/wp/wp6981885.jpg',
+    'https://wallpapercave.com/wp/wp12987582.jpg',
+    'https://papers.co/desktop/wp-content/uploads/papers.co-bj03-art-logo-wave-simple-minimal-dark-29-wallpaper.jpg',
+    'https://wallpapersok.com/images/hd/simple-desktop-dark-mountain-ranges-0kzg6ijbklcsa9hl.jpg',
+    'https://www.pixelstalk.net/wp-content/uploads/images4/Original-Simple-Background.png',
+    'https://www.pixelstalk.net/wp-content/uploads/2016/06/Minimalist-Backgrounds.png'
+  ];
+  const chosen = wallpapers[Math.floor(Math.random() * wallpapers.length)];
+  document.body.style.background = `url('${chosen}') no-repeat center center fixed`;
+  document.body.style.backgroundSize = 'cover';
+</script>
+
+</body>
+</html>

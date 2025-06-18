@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Elite Z - World Infection Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body {
+    margin: 0;
+    height: 100%;
+    background-color: #0f0f0f;
+    overflow: hidden;
+    }
+
+    #map {
+    height: 100%;
+    width: 100%;
+    background-color: #0f0f0f; /* FIXES visible gaps */
+    }
+
+    .title-banner {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 25px;
+    border-radius: 12px;
+    color: #00ffe0;
+    font-family: monospace;
+    font-size: 24px;
+    text-shadow: 0 0 10px #00ffe0, 0 0 20px #ff00ff;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="title-banner">🌍 Choose a Country to Infect</div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <script>
+    const map = L.map('map', {
+    center: [20, 0],
+    zoom: 2,
+    minZoom: 2,
+    maxZoom: 6,
+    maxBounds: [
+        [-85, -180], // near South Pole
+        [85, 180]    // near North Pole
+    ],
+    maxBoundsViscosity: 1.0,
+    worldCopyJump: false
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    noWrap: true               // 🔥 THIS IS THE KEY LINE
+    }).addTo(map);
+
+
+    const infectedCountries = new Set();
+
+    function style(feature) {
+      const countryName = feature.properties.ADMIN || feature.properties.name;
+      return {
+        fillColor: infectedCountries.has(countryName) ? '#ff0055' : '#ffffff22',
+        weight: 1,
+        opacity: 1,
+        color: '#ffffff44',
+        fillOpacity: 0.6
+      };
+    }
+
+    function onEachFeature(feature, layer) {
+      const countryName = feature.properties.ADMIN || feature.properties.name;
+      layer.on({
+        mouseover: function () {
+          layer.setStyle({ color: '#00ffff', weight: 2, fillOpacity: 0.75 });
+        },
+        mouseout: function () {
+          geojson.resetStyle(layer);
+        },
+        click: function () {
+          if (!countryName) return;
+          if (!infectedCountries.has(countryName)) {
+            infectedCountries.add(countryName);
+            alert(`🦠 Infection started in ${countryName}`);
+          } else {
+            infectedCountries.delete(countryName);
+            alert(`🧼 Infection removed from ${countryName}`);
+          }
+          geojson.setStyle(style);
+        }
+      });
+    }
+
+    let geojson;
+
+    axios.get('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
+      .then(response => {
+        geojson = L.geoJson(response.data, {
+          style: style,
+          onEachFeature: onEachFeature
+        }).addTo(map);
+      });
+  </script>
+</body>
+</html>

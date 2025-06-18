@@ -1,0 +1,9 @@
+body {
+  background-color: #0f0f0f;
+  color: #0f0;
+  font-family: 'Courier New', monospace;
+}
+
+#editor {
+  background-color: #111;
+}
