@@ -1,0 +1,106 @@
+{
+  "name": "whatisthis",
+  "blueprint": {
+    "1": {
+      "id": 1,
+      "name": "PopupShow",
+      "class": "popupshow",
+      "values": {
+        "use_variable": true,
+        "message": "placeholder text"
+      },
+      "inputs": {
+        "input_1": [
+          {
+            "node": "4",
+            "input": "output_1"
+          }
+        ]
+      },
+      "outputs": {
+        "output_1": [
+          {
+            "node": "5",
+            "output": "input_1"
+          }
+        ]
+      },
+      "pos_x": 580,
+      "pos_y": 461
+    },
+    "2": {
+      "id": 2,
+      "name": "Variable",
+      "class": "variable",
+      "values": {
+        "name": "stringos",
+        "type": "string",
+        "value": "sick MONEY"
+      },
+      "inputs": {},
+      "outputs": {},
+      "pos_x": 578,
+      "pos_y": 144
+    },
+    "3": {
+      "id": 3,
+      "name": "Start",
+      "class": "start",
+      "values": {},
+      "inputs": {},
+      "outputs": {
+        "output_1": [
+          {
+            "node": "4",
+            "output": "input_1"
+          }
+        ]
+      },
+      "pos_x": -17,
+      "pos_y": 520
+    },
+    "4": {
+      "id": 4,
+      "name": "VariableGet",
+      "class": "variableget",
+      "values": {
+        "name": "stringos"
+      },
+      "inputs": {
+        "input_1": [
+          {
+            "node": "3",
+            "input": "output_1"
+          }
+        ]
+      },
+      "outputs": {
+        "output_1": [
+          {
+            "node": "1",
+            "output": "input_1"
+          }
+        ]
+      },
+      "pos_x": 269,
+      "pos_y": 498
+    },
+    "5": {
+      "id": 5,
+      "name": "End",
+      "class": "end",
+      "values": {},
+      "inputs": {
+        "input_1": [
+          {
+            "node": "1",
+            "input": "output_1"
+          }
+        ]
+      },
+      "outputs": {},
+      "pos_x": 846,
+      "pos_y": 456
+    }
+  }
+}

@@ -30,6 +30,7 @@
       border-radius: 6px;
       color: #dcdcdc;
       box-shadow: 0 0 6px #000;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .drawflow-node h3 {
@@ -37,7 +38,13 @@
       font-size: 14px;
       color: #87ceeb; /* UE4-style light cyan titles */
     }
+    .drawflow-node label, .drawflow-node small {
+        color:rgba(255, 255, 255, 0.72);
+    }
+    .drawflow-node b {
+        color:rgb(0, 106, 255);
 
+    }
     .drawflow-node input,
     .drawflow-node select,
     .drawflow-node textarea {
@@ -54,56 +61,124 @@
       stroke-width: 2px;
     }
 
-    #toolbox {
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        z-index: 99;
-        background: #181a21cc;
-        padding: 14px 16px 10px 14px;
-        border-radius: 10px;
-        box-shadow: 0 3px 18px #000a;
-        width: max-content; /* allow full button width */
-        max-width: none;    /* remove width limit */
+    .drawflow-node:hover {
+    border-color: #ff4444 !important;
+    box-shadow: 0 0 10px #ff444488;
     }
 
+    /* Selected = green border */
+    .drawflow-node.selected {
+    border-color: #00ff66 !important;
+    box-shadow: 0 0 12px #00ff6688;
+    }
+    .drawflow-node.custom-selected,
+    .drawflow-node.custom-selected:hover {
+    border-color: #00ff66 !important;
+    box-shadow: 0 0 12px #00ff6688;
+    }
+
+    .drawflow-node:hover {
+    border-color: #ff4444 !important;
+    box-shadow: 0 0 10px #ff444488;
+    }
+
+    #toolbox {
+    position: fixed;
+    top: 16px; left: 16px;
+    z-index: 99;
+    background: #181a21ee;
+    border-radius: 13px;
+    box-shadow: 0 4px 28px #000d;
+    width: 278px;
+    min-height: 90px;
+    max-height: 94vh;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 8px 10px 8px;
+    gap: 5px;
+    }
+    #toolbox-tabs {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 2px;
+    flex-wrap: wrap;
+    }
+    .toolbox-tab {
+    flex: 1 1 0;
+    background: #16181f;
+    border: none;
+    color: #0ff;
+    font-weight: 600;
+    padding: 7px 6px;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    outline: none;
+    transition: background 0.18s, color 0.18s;
+    }
+    .toolbox-tab.active {
+    background: #23273b;
+    color: #fff;
+    z-index: 1;
+    }
+    .toolbox-tab:not(.active):hover {
+    background: #0ff1;
+    color: #fff;
+    }
+    #toolbox-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 7px 11px;
+    margin: 2px 0 5px 0;
+    border-radius: 5px;
+    border: 1px solid #23283e;
+    font-size: 13px;
+    background: #14161b;
+    color: #0ff;
+    }
+    #toolbox-list {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-height: 50px;
+    }
     .toolbox-btn {
     display: block;
     width: 100%;
-    margin: 6px 0;
-    padding: 10px 14px;
+    padding: 10px 11px;
+    margin: 0;
     font-family: 'Consolas', monospace;
     font-size: 13px;
-    color: #ffffff;
-    background: linear-gradient(145deg, #1a1a1a, #111);
-    border: 1px solid #333;
+    color: #fff;
+    background: linear-gradient(145deg, #20232c, #181b22);
+    border: 1px solid #23283e;
     border-radius: 6px;
     text-align: left;
-    white-space: normal;
-    word-break: break-word;
     cursor: pointer;
-    box-shadow: inset 0 0 0 1px #000, 0 2px 4px rgba(0, 0, 0, 0.4);
-    transition: all 0.15s ease-in-out;
+    box-shadow: 0 1px 3px #0003;
+    transition: all 0.15s;
     }
     .toolbox-btn:hover {
-    background: linear-gradient(145deg, #232323, #181818);
-    border-color: #555;
-    box-shadow: inset 0 0 0 1px #333, 0 2px 8px rgba(0, 0, 0, 0.6);
+    background: #171b22;
     color: #0ff;
-    }
-
-    .toolbox-btn:active {
-    transform: scale(0.98);
-    background: #101010;
     border-color: #0ff;
-    color: #0ff;
+    }
+    .toolbox-btn:active {
+    background: #11131a;
+    }
+    .toolbox-empty {
+    color: #888;
+    text-align: center;
+    padding: 20px 4px;
+    font-size: 14px;
     }
 
     .toolbox-btn:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px #0ff inset;
+        outline: none;
+        box-shadow: 0 0 0 2px #0ff inset;
     }
-
     .top-right-corner {
     position: absolute;
     top: 15px;
@@ -140,25 +215,17 @@
 </head>
 <body>
     <div id="toolbox">
-        <b style="color:#00ffe0">Toolbox:</b><br>
-        <button class="toolbox-btn" onclick="addBlueprintNode('Start')">+ Add Start Function</button><br>
-        <button class="toolbox-btn" onclick="addBlueprintNode('Variable')">+ Add Variable</button><br>
-        <button class="toolbox-btn" onclick="addBlueprintNode('VariableGet')">+ Get Variable</button><br>
-        <button class="toolbox-btn" onclick="addBlueprintNode('VariableSet')">+ Set Variable</button><br>
-        <button class="toolbox-btn" onclick="addBlueprintNode('IfCond')">+ Add If Condition</button><br>
-        <button class="toolbox-btn" onclick="addBlueprintNode('Ransomware')">+ Add Ransomware</button><br>
-        <button class="toolbox-btn" onclick="addBlueprintNode('ScreenMelter')">+ Add Screen Melter</button><br>
-        <button class="toolbox-btn" onclick="addBlueprintNode('TriggerBSOD')">+ Trigger BSOD</button><br>
-        <button class="toolbox-btn" onclick="addBlueprintNode('PopupSpam')">+ Popup Spam</button><br>
-        <button class="toolbox-btn" onclick="addBlueprintNode('PopupShow')">+ Popup Messagebox</button><br>
-        <button class="toolbox-btn" onclick="addBlueprintNode('Delay')">+ Delay</button><br>
-        <button class="toolbox-btn" onclick="addBlueprintNode('End')">+ End Node</button><br>
-        <button class="toolbox-btn" onclick="saveBlueprint()">💾 Save Blueprint</button>
-        <button class="toolbox-btn" onclick="runCurrentBlueprint()">▶️ Run Blueprint</button>
-        <button class="toolbox-btn" onclick="loadBlueprint()">▶️ Load Blueprint</button>
-        <button class="toolbox-btn" onclick="exportBlueprint()">▶️ Export Blueprint</button>
-
+        <div id="toolbox-tabs">
+            <button class="toolbox-tab active" data-cat="Malware">🦠 Malware</button>
+            <button class="toolbox-tab" data-cat="Logic">⚙️ Logic</button>
+            <button class="toolbox-tab" data-cat="Monitoring">🖥️ Monitoring</button>
+            <button class="toolbox-tab" data-cat="Main">🚩 Main</button>
+            <button class="toolbox-tab" data-cat="File">🗃️ File</button>
+        </div>
+        <input id="toolbox-search" type="text" placeholder="Search..." autocomplete="off" />
+        <div id="toolbox-list"></div>
     </div>
+
 
     <div id="dropzone"
         style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(24,26,33,0.93);color:#00ffe0;font-size:30px;">
@@ -166,17 +233,431 @@
     </div>
 
     <div class="top-right-corner">
-        <button class="back-btn" onclick="window.location.href='/index.html'">BACK</button>
+        <button class="back-btn" onclick="window.location.href='/main'">Main Menu</button>
+        <button class="back-btn" onclick="window.location.href='/vm'">Sandbox</button>
     </div>
 
   <div id="drawflow"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/drawflow/dist/drawflow.min.js"></script>
   <script>
+
+
+    let nodeInfo = {
+        "Start": {
+        html: `<div><h3>▶️ Start</h3><label>Main Function!</label></div>`,
+        inputs: 0, outputs: 1, name: "Start"
+        },
+        "ScreenMelter": {
+        html: `<div><h3>🔥 Screen Melter</h3><label>Strength</label><input type="range" min="1" max="10" value="5"></div>`,
+        inputs: 1, outputs: 1, name: "ScreenMelter"
+        },
+        "IfCond": {
+        html: `<div>
+            <h3>🧩 IF Boolean Only</h3>
+            <label>Condition</label>
+            <div style="margin-top:12px;font-size:13px;">
+            <b>True:1. output</b><br>
+            <b>False:2. output</b>
+            </div>
+        </div>`,
+        inputs: 1, // exec + value (boolean)
+        outputs: 2, // true, false
+        name: "IfCond"
+        },
+
+        "Variable": {
+        html: `<div>
+            <h3>📦 Variable</h3>
+            <label>Name</label>
+            <input type="text" value="myVar" class="var-name" style="width:90%" /><br>
+            <label>Type</label>
+            <select class="var-type" style="width:100%" onchange="this.parentElement.querySelector('.var-value').type=this.value=='boolean'?'checkbox':this.value">
+            <option value="boolean">Boolean</option>
+            <option value="string">String</option>
+            <option value="number">Number</option>
+            </select><br>
+            <label>Value</label>
+            <input class="var-value" type="checkbox" />
+        </div>`,
+        inputs: 0,
+        outputs: 0,
+        name: "Variable"
+        },
+
+        "VariableGet": {
+        html: `<div>
+            <h3>🔎 Get Variable</h3>
+            <label>Name</label>
+            <select class="var-get-name"></select>
+        </div>`,
+        inputs: 1,    // "exec" (when to get value)
+        outputs: 1,   // Value output (wired to IfCond or anything)
+        name: "VariableGet"
+        },
+
+        "VariableSet": {
+        html: `<div>
+            <h3>✏️ Set Variable</h3>
+            <label>Name</label>
+            <select class="var-set-name"></select><br>
+            <label>Value</label>
+            <input class="var-set-value" type="text" />
+        </div>`,
+        inputs: 2, // exec, and value (could be 1 and let value come from UI or wire)
+        outputs: 1, // exec out (for chaining)
+        name: "VariableSet"
+        },
+
+        "Ransomware": {
+        html: `<div>
+        <h3>🔐 Ransomware</h3>
+        <label>Ransom Note</label><br>
+        <textarea rows="6" style="width:100%;background:#1a1a1a;color:#fff;border:1px solid #555;font-family:monospace;font-size:14px;">
+        Hello, this is RansomJokey.
+        Your files have been encrypted.
+
+        Pay $300 in BTC to get the decryption key.
+        You have 48 hours or your files are gone forever.
+        </textarea>
+        </div>`,
+        inputs: 1, outputs: 1, name: "Ransomware"
+        },
+        "TriggerBSOD": {
+        html: `<div><h3>💀 Trigger BSOD</h3><small>Instant crash</small></div>`,
+        inputs: 1, outputs: 1, name: "TriggerBSOD"
+        },
+        "PopupSpam": {
+        html: `<div><h3>⚠️ Popup Spam</h3><label>Count</label><input type="number" value="10" min="1"></div>`,
+        inputs: 1, outputs: 1, name: "PopupSpam"
+        },
+        "Keylogger": {
+        html: `<div><h3>⌨️ Keylogger</h3><label>To file:</label><input value="log.txt"></div>`,
+        inputs: 1, outputs: 1, name: "Keylogger"
+        },
+        "CryptoMiner": {
+        html: `<div><h3>⛏️ Crypto Miner</h3><label>Mining Power</label><input type="range" min="1" max="100" value="30"></div>`,
+        inputs: 1, outputs: 1, name: "CryptoMiner"
+        },
+        "BackgroundChanger": {
+        html: `<div><h3>🎨 Background Changer</h3><label>Url</label><input type="text" value="enter_url"></div>`,
+        inputs: 1, outputs: 1, name: "BackgroundChanger"
+        },
+        "PopupShow": {
+        html: `<div>
+            <h3>💬 Popup Messagebox</h3>
+            <label>Use Variable</label>
+            <input type="checkbox" class="popup-use-var">
+            <label id="popupmsg">Message</label>
+            <input type="text" class="popup-msg-input" value="placeholder text">
+        </div>`,
+        inputs: 1, outputs: 1, name: "PopupShow"
+        },
+        "RAT": {
+        html: `<div><h3>🐀 RAT Backdoor</h3><label>Server</label><input value="127.0.0.1"></div>`,
+        inputs: 1, outputs: 1, name: "RAT"
+        },
+        "Delay": {
+        html: `<div><h3>🕒 Delay</h3><label>Duration (s)</label><input type="number" value="2"></div>`,
+        inputs: 1, outputs: 1, name: "Delay"
+        },
+        "End": {
+        html: `<div><h3>🔚 Do nothing, end.</h3><label>End Node</label></div>`,
+        inputs: 1, outputs: 0, name: "End"
+        }
+    };
+
     const container = document.getElementById("drawflow");
     const editor = new Drawflow(container);
     editor.reroute = true;
     editor.start();
+
+    const drawflowContainer = document.getElementById("drawflow");
+
+    // Holds the current selected node DOM elements
+    let selectedNodes = [];
+
+    let multiListenersActive = false;
+    function updateSelectedNodes() {
+        selectedNodes = Array.from(document.querySelectorAll('.drawflow-node.custom-selected'));
+        if (selectedNodes.length > 1 && !multiListenersActive) {
+            enableMultiNodeListeners();
+            multiListenersActive = true;
+        } else if (selectedNodes.length <= 1 && multiListenersActive) {
+            disableMultiNodeListeners();
+            multiListenersActive = false;
+        }
+    }
+
+    // Use event delegation for dynamic nodes
+    drawflowContainer.addEventListener("click", function (e) {
+    const node = e.target.closest(".drawflow-node");
+    const isCtrl = e.ctrlKey || e.metaKey;
+
+    if (!node && !isCtrl) {
+        document.querySelectorAll(".drawflow-node.custom-selected").forEach(n =>
+        n.classList.remove("custom-selected")
+        );
+        updateSelectedNodes();
+        return;
+    }
+    if (node) {
+        if (isCtrl) {
+        node.classList.toggle("custom-selected");
+        } else {
+        document.querySelectorAll(".drawflow-node.custom-selected").forEach(n =>
+            n.classList.remove("custom-selected")
+        );
+        node.classList.add("custom-selected");
+        }
+        updateSelectedNodes();
+        e.stopPropagation();
+    }
+    });
+
+    // Ctrl+A
+    document.addEventListener("keydown", function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        document.querySelectorAll(".drawflow-node").forEach(n =>
+        n.classList.add("custom-selected")
+        );
+        updateSelectedNodes();
+    }
+    });
+
+    // On page load, make sure array is in sync
+    updateSelectedNodes();
+
+
+    function enableMultiNodeListeners() {
+        // --- DELETE MULTIPLE NODES ---
+        document.addEventListener("keydown", multiDeleteHandler, true);
+
+        // --- GROUP DRAG ---
+        drawflowContainer.addEventListener("mousedown", groupDragMouseDown, true);
+        document.addEventListener("mousemove", groupDragMouseMove, true);
+        document.addEventListener("mouseup", groupDragMouseUp, true);
+    }
+
+    function disableMultiNodeListeners() {
+        document.removeEventListener("keydown", multiDeleteHandler, true);
+        drawflowContainer.removeEventListener("mousedown", groupDragMouseDown, true);
+        document.removeEventListener("mousemove", groupDragMouseMove, true);
+        document.removeEventListener("mouseup", groupDragMouseUp, true);
+    }
+
+        
+    function multiDeleteHandler(e) {
+    if ((e.key === "Delete" || e.key === "Backspace") && selectedNodes.length > 1) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        document.querySelectorAll('.drawflow-node.selected').forEach(n => n.classList.remove('selected'));
+        if (typeof editor.selected_node !== "undefined") editor.selected_node = null;
+
+        const idsToDelete = selectedNodes
+        .map(node => node.id.replace("node-", ""))
+        .sort((a, b) => b - a);
+
+        for (let i = 0; i < idsToDelete.length; ++i) {
+        const nodeId = idsToDelete[i];
+        if (editor.drawflow.drawflow.Home.data[nodeId]) {
+            editor.removeNodeId('node-' + nodeId);
+        }
+        }
+        setTimeout(() => updateSelectedNodes(), 10);
+        return;
+    }
+    }
+
+    // Dragging group
+    let isGroupDragging = false;
+    let groupDragStart = { x: 0, y: 0 };
+    let nodesDragStart = [];
+
+    function groupDragMouseDown(e) {
+    if (selectedNodes.length <= 1) return;
+    const node = e.target.closest(".drawflow-node.custom-selected");
+    if (node && e.button === 0) {
+        isGroupDragging = true;
+        groupDragStart.x = e.clientX;
+        groupDragStart.y = e.clientY;
+        nodesDragStart = selectedNodes.map(n => {
+        const nodeId = n.id.replace("node-", "");
+        const nodeData = editor.getNodeFromId(nodeId);
+        return {
+            node: n,
+            nodeId: nodeId,
+            startX: nodeData.pos_x,
+            startY: nodeData.pos_y
+        };
+        });
+        document.body.style.userSelect = "none";
+    }
+    }
+
+    function groupDragMouseMove(e) {
+    if (!isGroupDragging) return;
+    const dx = e.clientX - groupDragStart.x;
+    const dy = e.clientY - groupDragStart.y;
+    nodesDragStart.forEach(item => {
+        const newX = item.startX + dx;
+        const newY = item.startY + dy;
+        item.node.style.left = newX + "px";
+        item.node.style.top = newY + "px";
+        const nodeData = editor.getNodeFromId(item.nodeId);
+        if (nodeData) {
+        nodeData.pos_x = newX;
+        nodeData.pos_y = newY;
+        // *** Force Drawflow to update connection lines for this node ***
+        if (typeof editor.updateConnectionNodes === "function") {
+            editor.updateConnectionNodes('node-' + item.nodeId);
+        }
+        }
+    });
+    }
+
+    function groupDragMouseUp(e) {
+    if (isGroupDragging) {
+        isGroupDragging = false;
+        nodesDragStart = [];
+        document.body.style.userSelect = "";
+    }
+    }
+
+
+    const TOOLBOX_ITEMS = {
+    Malware: [
+        {label: "💀 Trigger BSOD", action: () => addBlueprintNode('TriggerBSOD')},
+        {label: "🔥 Screen Melter", action: () => addBlueprintNode('ScreenMelter')},
+        {label: "🔐 Ransomware", action: () => addBlueprintNode('Ransomware')},
+        {label: "⚠️ Popup Spam", action: () => addBlueprintNode('PopupSpam')},
+        {label: "🎨 Background Changer", action: () => addBlueprintNode('BackgroundChanger')}
+    ],
+    Logic: [
+        {label: "📦 Add Variable", action: () => addBlueprintNode('Variable')},
+        {label: "🔥 Get Variable", action: () => addBlueprintNode('VariableGet')},
+        {label: "✏️ Set Variable", action: () => addBlueprintNode('VariableSet')},
+        {label: "🧩 If Boolean Condition", action: () => addBlueprintNode('IfCond')},
+        {label: "🕒 Delay", action: () => addBlueprintNode('Delay')}
+    ],
+    Monitoring: [
+        {label: "💬 Popup Messagebox", action: () => addBlueprintNode('PopupShow')}
+    ],
+    Main: [
+        {label: "▶️ Start Function", action: () => addBlueprintNode('Start')},
+        {label: "🔚 End Node", action: () => addBlueprintNode('End')}
+    ],
+    File: [
+        {label: "💾 Save Blueprint", action: () => saveBlueprint()},
+        {label: "▶️ Run Blueprint", action: () => runCurrentBlueprint()},
+        {label: "▶️ Load Blueprint", action: () => loadBlueprint()},
+        {label: "▶️ Export Blueprint", action: () => exportBlueprint()}
+    ]
+    };
+
+    function renderToolbox(cat, filter = "") {
+        const box = document.getElementById("toolbox-list");
+        box.innerHTML = "";
+
+        // If filter is empty, show only current category, else show results from all
+        let items;
+        if (!filter.trim()) {
+            items = TOOLBOX_ITEMS[cat] || [];
+        } else {
+            // Flatten all categories into one array
+            items = Object.values(TOOLBOX_ITEMS)
+                .flat()
+                .filter(item => item.label.toLowerCase().includes(filter.toLowerCase()));
+        }
+
+        if (items.length === 0) {
+            box.innerHTML = `<div class="toolbox-empty">No nodes found.</div>`;
+            return;
+        }
+        for (const { label, action } of items) {
+            const btn = document.createElement("button");
+            btn.className = "toolbox-btn";
+            btn.textContent = label;
+            btn.onclick = action;
+            box.appendChild(btn);
+        }
+    }
+
+    function setActiveTab(cat) {
+        document.querySelectorAll('.toolbox-tab').forEach(tab =>
+            tab.classList.toggle('active', tab.dataset.cat === cat)
+        );
+    }
+    let currentCat = "Malware";
+    renderToolbox(currentCat);
+    setActiveTab(currentCat);
+
+    document.querySelectorAll('.toolbox-tab').forEach(tab => {
+        tab.onclick = () => {
+            currentCat = tab.dataset.cat;
+            setActiveTab(currentCat);
+            document.getElementById("toolbox-search").value = "";
+            renderToolbox(currentCat);
+        }
+    });
+    document.getElementById("toolbox-search").oninput = e => {
+        renderToolbox(currentCat, e.target.value);
+    };
+
+    let lastMouseX = 300;
+    let lastMouseY = 100;
+
+    drawflowContainer.addEventListener("mousemove", function(e) {
+        // Only update if mouse is inside the canvas
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+    });
+
+    function getCanvasViewportCenterCoords() {
+        const rect = drawflowContainer.getBoundingClientRect();
+        const precanvas = document.querySelector('.drawflow .precanvas') || editor.precanvas;
+        let zoom = 1, panX = 0, panY = 0;
+
+        // Try to read from style.transform: "matrix(a, b, c, d, tx, ty)"
+        if (precanvas && precanvas.style.transform) {
+            // Example: "matrix(1, 0, 0, 1, -800, -1200)"
+            const match = precanvas.style.transform.match(/matrix\(([^,]+),[^,]+,[^,]+,[^,]+,([^,]+),([^)]+)\)/);
+            if (match) {
+            zoom = parseFloat(match[1]) || 1;
+            panX = parseFloat(match[2]) || 0;
+            panY = parseFloat(match[3]) || 0;
+            } else {
+            // Try: "translate(Xpx, Ypx) scale(Z)"
+            const trans = precanvas.style.transform;
+            const translateMatch = trans.match(/translate\(([^p]+)px,\s*([^p]+)px\)/);
+            const scaleMatch = trans.match(/scale\(([^)]+)\)/);
+            if (translateMatch) {
+                panX = parseFloat(translateMatch[1]);
+                panY = parseFloat(translateMatch[2]);
+            }
+            if (scaleMatch) {
+                zoom = parseFloat(scaleMatch[1]);
+            }
+            }
+        } else {
+            // fallback (legacy)
+            zoom = editor.zoom || 1;
+            panX = parseInt(precanvas?.style.left || 0, 10) || 0;
+            panY = parseInt(precanvas?.style.top  || 0, 10) || 0;
+        }
+
+        // Center of the visible area in viewport pixels
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        // Now convert to canvas space
+        return {
+            x: ((centerX - rect.left) - panX) / zoom,
+            y: ((centerY - rect.top) - panY) / zoom
+        };
+    }
 
 
     console.log("✅ UE-style Blueprint Editor Ready");
@@ -231,129 +712,51 @@
         }, 20);
     }
 
-    let nodeInfo = {
-        "Start": {
-        html: `<div><h3>🖥️ Start</h3><label>Main Function!</label></div>`,
-        inputs: 0, outputs: 1, name: "Start"
-        },
-        "ScreenMelter": {
-        html: `<div><h3>🖥️ Screen Melter</h3><label>Strength</label><input type="range" min="1" max="10" value="5"></div>`,
-        inputs: 1, outputs: 1, name: "ScreenMelter"
-        },
-        "IfCond": {
-        html: `<div>
-            <h3>🖥️ IF</h3>
-            <label>Condition (Boolean Input)</label>
-            <div>(Wire variable-get or any boolean value here!)</div>
-            <div style="margin-top:12px;font-size:13px;">
-            <b>True:</b>TRUE<br>
-            <b>False:</b>FALSE
-            </div>
-        </div>`,
-        inputs: 2, // exec + value (boolean)
-        outputs: 2, // true, false
-        name: "IfCond"
-        },
+    if (type === "PopupShow") {
+        setTimeout(() => {
+            const nodes = document.querySelectorAll('.drawflow-node');
+            const el = nodes[nodes.length - 1];
+            const checkbox = el.querySelector('.popup-use-var');
+            const msgInput = el.querySelector('.popup-msg-input');
 
-        "Variable": {
-        html: `<div>
-            <h3>📦 Variable</h3>
-            <label>Name</label>
-            <input type="text" value="myVar" class="var-name" style="width:90%" /><br>
-            <label>Type</label>
-            <select class="var-type" style="width:100%" onchange="this.parentElement.querySelector('.var-value').type=this.value=='boolean'?'checkbox':this.value">
-            <option value="boolean">Boolean</option>
-            <option value="string">String</option>
-            <option value="number">Number</option>
-            </select><br>
-            <label>Value</label>
-            <input class="var-value" type="checkbox" />
-        </div>`,
-        inputs: 0,
-        outputs: 0,
-        name: "Variable"
-        },
+            // Store to drawflow data (node.values) on change:
+            function updateInputVisibility() {
+                msgInput.style.display = checkbox.checked ? "none" : "";
+                document.getElementById('popupmsg').style.display = checkbox.checked ? "none" : "";
+                // Save the state in the node's data
+                const nodeId = el.id.replace("node-", "");
+                const nodeData = editor.getNodeFromId(nodeId);
+                if (nodeData) {
+                    nodeData.values = nodeData.values || {};
+                    nodeData.values.useVariable = checkbox.checked;
+                    nodeData.values.message = msgInput.value;
+                }
+            }
 
-        "VariableGet": {
-        html: `<div>
-            <h3>🔎 Get Variable</h3>
-            <label>Name</label>
-            <select class="var-get-name"></select>
-        </div>`,
-        inputs: 1,    // "exec" (when to get value)
-        outputs: 1,   // Value output (wired to IfCond or anything)
-        name: "VariableGet"
-        },
+            // Also save value change
+            msgInput.addEventListener('input', updateInputVisibility);
+            checkbox.addEventListener('change', updateInputVisibility);
 
-        "VariableSet": {
-        html: `<div>
-            <h3>✏️ Set Variable</h3>
-            <label>Name</label>
-            <select class="var-set-name"></select><br>
-            <label>Value</label>
-            <input class="var-set-value" type="text" />
-        </div>`,
-        inputs: 2, // exec, and value (could be 1 and let value come from UI or wire)
-        outputs: 1, // exec out (for chaining)
-        name: "VariableSet"
-        },
+            // Initial setup
+            updateInputVisibility();
+        }, 20);
+    }
 
-        "Ransomware": {
-        html: `<div>
-        <h3>🖥️ Ransomware</h3>
-        <label>Ransom Note</label><br>
-        <textarea rows="6" style="width:100%;background:#1a1a1a;color:#fff;border:1px solid #555;font-family:monospace;font-size:14px;">
-        Hello, this is RansomJokey.
-        Your files have been encrypted.
 
-        Pay $300 in BTC to get the decryption key.
-        You have 48 hours or your files are gone forever.
-        </textarea>
-        </div>`,
-        inputs: 1, outputs: 1, name: "Ransomware"
-        },
-        "TriggerBSOD": {
-        html: `<div><h3>💀 Trigger BSOD</h3><small>Instant crash</small></div>`,
-        inputs: 1, outputs: 1, name: "TriggerBSOD"
-        },
-        "PopupSpam": {
-        html: `<div><h3>⚠️ Popup Spam</h3><label>Count</label><input type="number" value="10" min="1"></div>`,
-        inputs: 1, outputs: 1, name: "PopupSpam"
-        },
-        "Keylogger": {
-        html: `<div><h3>⌨️ Keylogger</h3><label>To file:</label><input value="log.txt"></div>`,
-        inputs: 1, outputs: 1, name: "Keylogger"
-        },
-        "CryptoMiner": {
-        html: `<div><h3>⛏️ Crypto Miner</h3><label>Mining Power</label><input type="range" min="1" max="100" value="30"></div>`,
-        inputs: 1, outputs: 1, name: "CryptoMiner"
-        },
-        "PopupShow": {
-        html: `<div><h3>⛏️ Popup Messagebox</h3><label>Mining Power</label><input type="text" value="placeholder text"></div>`,
-        inputs: 1, outputs: 1, name: "PopupShow"
-        },
-        "RAT": {
-        html: `<div><h3>🐀 RAT Backdoor</h3><label>Server</label><input value="127.0.0.1"></div>`,
-        inputs: 1, outputs: 1, name: "RAT"
-        },
-        "Delay": {
-        html: `<div><h3>🕒 Delay</h3><label>Duration (s)</label><input type="number" value="2"></div>`,
-        inputs: 1, outputs: 1, name: "Delay"
-        },
-        "End": {
-        html: `<div><h3>🕒 Do nothing, end.</h3><label>End Node</label></div>`,
-        inputs: 1, outputs: 0, name: "End"
-        }
-    };
+    const { x, y } = getCanvasViewportCenterCoords();
+
     let node = nodeInfo[type];
+    console.log('Spawning at', lastMouseX, lastMouseY, 'canvas:', x, y);
+
     // Pridá nový node s menom, pozíciou random (alebo daj lepšie)
     editor.addNode(node.name, node.inputs, node.outputs, 
-        80 + Math.random()*200, 100 + Math.random()*200, 
+        x,y, 
         node.name.toLowerCase(), {}, node.html);
 
         updateVariableDropdowns();
 
     }
+
 
     function runBlueprint(cleanBp) {
         // 1. Find Start node
@@ -446,6 +849,18 @@
                     let cond = evalInput(node, 1);
                     let branch = cond ? 0 : 1; // 0 = TRUE, 1 = FALSE
                     let nextId = getNextId(node, branch);
+                    if (nextId) runNode(cleanBp[nextId]);
+                    break;
+                }
+                case "PopupShow": {
+                    // If useVariable, evaluate input 1 (the wire must connect to GetVariable node)
+                    let text;
+                    if (node.values && node.values.useVariable) {
+                        text = evalInput(node, 1); // This will call GetVariable and get its value
+                    } else {
+                        text = node.values && node.values.message;
+                    }
+                    let nextId = getNextId(node, 0);
                     if (nextId) runNode(cleanBp[nextId]);
                     break;
                 }
@@ -570,7 +985,11 @@
                     if (input.type === "checkbox") {
                         inputValues[key] = input.checked;
                     } else {
+                        if (input.classList.contains("popup-msg-input") && domNode.querySelector(".popup-use-var")?.checked) {
+                        // Do not save message if "Use Variable" is checked
+                        } else {
                         inputValues[key] = input.value;
+                        }
                     }
                 });
             }
@@ -607,6 +1026,11 @@
 
     function checkBlueprintLogic(cleanBp) {
         let errors = [];
+        if (!cleanBp || Object.keys(cleanBp).length === 0) {
+            errors.push("Blueprint is empty! Please add some nodes before running.");
+            return errors;
+        }
+
         for (let id in cleanBp) {
             const n = cleanBp[id];
 
@@ -629,6 +1053,24 @@
             ) {
                 errors.push(`Node ${n.name} (#${id}) does not output to any node`);
             }
+
+            if (
+                n.name === "PopupShow" &&
+                (n.values.use_variable || n.values.useVariable)
+            ) {
+                // Check if input_1 is connected
+                if (!n.inputs.input_1 || n.inputs.input_1.length === 0) {
+                    errors.push(`Popup Messagebox (#${id}) is set to use a variable, but is not connected to any input! Connect a Variable Get node.`);
+                } else {
+                    // Get the connected node's ID
+                    const inputNodeId = n.inputs.input_1[0].node;
+                    const inputNode = cleanBp[inputNodeId];
+                    if (!inputNode || inputNode.name !== "VariableGet") {
+                        errors.push(`Popup Messagebox (#${id}) is set to use a variable, but its input is not a Variable Get node!`);
+                    }
+                }
+            }
+
 
             // IfCond can have only one or zero outputs, that's fine
             if (n.name === "IfCond") {
@@ -707,45 +1149,86 @@ function exportBlueprint() {
     URL.revokeObjectURL(url);
 }
 
-function autofillNodeInputs() {
-    // Prejdi všetky nody v DOM (už nakreslené Drawflowom)
+
+function autofillNodeInputs(patchedBlueprint) {
     document.querySelectorAll('.drawflow-node').forEach(nodeEl => {
-        // Zisti ID nodu podľa id="node-<id>"
-        const nodeId = nodeEl.id.replace("node-", "");
-        // Nájdeš daný node v editori
-        let nodeObj = null;
-        try {
-            nodeObj = editor.getNodeFromId ? editor.getNodeFromId(nodeId) : null;
-        } catch (e) {}
-        // Alebo fallback: môžeš použiť posledný načítaný blueprint (tvoj patchedNodes)
-        // Ale jednoduchšie je uložiť si aktuálny blueprint do globálu počas importu
+        const nodeId = nodeEl.id.replace("node-", "").trim();
+        const nodeData = patchedBlueprint && patchedBlueprint.hasOwnProperty(nodeId)
+            ? (patchedBlueprint[nodeId].values || {})
+            : {};
 
-        // Získaj hodnoty:
-        const data = nodeObj?.data || {};
-        // (alebo pre tvoju custom konverziu: patchedNodes[nodeId].data alebo .values)
-        // Ak načítavaš zo starého formátu, použij `patchedNodes[nodeId].data`
+        // --- Special handling for Variable nodes! ---
+        const nameInput = nodeEl.querySelector('.var-name');
+        const typeInput = nodeEl.querySelector('.var-type');
+        const valueInput = nodeEl.querySelector('.var-value');
+        if (nameInput && typeInput && valueInput) {
+            // Autofill name
+            if (nodeData.name) nameInput.value = nodeData.name;
+            // Autofill type
+            if (nodeData.type) {
+                typeInput.value = nodeData.type;
+                setTimeout(() => {
+                    valueInput.type = nodeData.type === "boolean" ? "checkbox" : nodeData.type;
+                    // Autofill value after type is set
+                    if (typeof nodeData.value !== "undefined") {
+                        if (nodeData.type === "boolean") {
+                            valueInput.checked = !!nodeData.value;
+                        } else {
+                            valueInput.value = nodeData.value;
+                        }
+                    }
+                }, 20);
+            } else {
+                // If no type, still fill value (text)
+                if (typeof nodeData.value !== "undefined") {
+                    valueInput.value = nodeData.value;
+                }
+            }
+            return; // Skip generic
+        }
 
-        // Pre každý input/textarea/select v node, nastav hodnotu podľa mena (alebo labelu)
+        if (nodeEl.classList.contains("popupshow")) {
+            const checkbox = nodeEl.querySelector('.popup-use-var');
+            const msgInput = nodeEl.querySelector('.popup-msg-input');
+            const label = nodeEl.querySelector('#popupmsg');
+            // Restore state from values
+            if (checkbox && typeof nodeData.use_variable !== "undefined") {
+                checkbox.checked = !!nodeData.use_variable;
+            }
+            if (msgInput && nodeData.message) {
+                msgInput.value = nodeData.message;
+            }
+            if (msgInput && nodeData.mining_power) {
+                msgInput.value = nodeData.mining_power;
+            }
+            function updateInputVisibility() {
+                msgInput.style.display = checkbox.checked ? "none" : "";
+                if (label) label.style.display = checkbox.checked ? "none" : "";
+            }
+            // Rebind (so it works after import)
+            checkbox && checkbox.addEventListener('change', updateInputVisibility);
+            // Initial update (IMPORTANT!)
+            updateInputVisibility();
+            // Don't let generic autofill mess with this block
+            return;
+        }
+
+        // --- GENERIC autofill for other nodes ---
         nodeEl.querySelectorAll('input, textarea, select').forEach(input => {
-            // Podľa názvu inputu a labelu vedľa neho nájdi kľúč v data
             let key = input.previousElementSibling && input.previousElementSibling.tagName === "LABEL"
                 ? input.previousElementSibling.innerText.trim().toLowerCase().replace(/\W+/g, "_")
                 : (input.name || input.type || "input");
-
-            // Ak tam taký key je, nahraj hodnotu
-            if (key in data) {
+            if (key in nodeData) {
                 if (input.type === "checkbox") {
-                    // Silno konvertuj na boolean
-                    let v = data[key];
-                    if (typeof v === "string") {
-                        v = v === true || v === "true" || v === "on";
-                    }
-                    input.checked = !!v;
-
+                    let v = nodeData[key];
+                    input.checked = (typeof v === "boolean") ? v : (v === "true" || v === "on" || v === true);
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                } else if (input.tagName === "SELECT") {
+                    setTimeout(() => { input.value = nodeData[key] || ""; }, 10);
                 } else if (input.type === "number" || input.type === "range") {
-                    input.value = Number(data[key]);
+                    input.value = Number(nodeData[key]);
                 } else {
-                    input.value = data[key];
+                    input.value = nodeData[key];
                 }
             }
         });
@@ -754,122 +1237,6 @@ function autofillNodeInputs() {
 
 
 function loadBlueprint(json) {
-
-
-    let nodeInfo = {
-        "Start": {
-        html: `<div><h3>🖥️ Start</h3><label>Main Function!</label></div>`,
-        inputs: 0, outputs: 1, name: "Start"
-        },
-        "ScreenMelter": {
-        html: `<div><h3>🖥️ Screen Melter</h3><label>Strength</label><input type="range" min="1" max="10" value="5"></div>`,
-        inputs: 1, outputs: 1, name: "ScreenMelter"
-        },
-        "IfCond": {
-        html: `<div>
-            <h3>🖥️ IF</h3>
-            <label>Condition (Boolean Input)</label>
-            <div>(Wire variable-get or any boolean value here!)</div>
-            <div style="margin-top:12px;font-size:13px;">
-            <b>True:</b>TRUE<br>
-            <b>False:</b>FALSE
-            </div>
-        </div>`,
-        inputs: 2, // exec + value (boolean)
-        outputs: 2, // true, false
-        name: "IfCond"
-        },
-
-        "Variable": {
-        html: `<div>
-            <h3>📦 Variable</h3>
-            <label>Name</label>
-            <input type="text" value="myVar" class="var-name" style="width:90%" /><br>
-            <label>Type</label>
-            <select class="var-type" style="width:100%" onchange="this.parentElement.querySelector('.var-value').type=this.value=='boolean'?'checkbox':this.value">
-            <option value="boolean">Boolean</option>
-            <option value="string">String</option>
-            <option value="number">Number</option>
-            </select><br>
-            <label>Value</label>
-            <input class="var-value" type="checkbox" />
-        </div>`,
-        inputs: 0,
-        outputs: 0,
-        name: "Variable"
-        },
-
-        "VariableGet": {
-        html: `<div>
-            <h3>🔎 Get Variable</h3>
-            <label>Name</label>
-            <select class="var-get-name"></select>
-        </div>`,
-        inputs: 1,    // "exec" (when to get value)
-        outputs: 1,   // Value output (wired to IfCond or anything)
-        name: "VariableGet"
-        },
-
-        "VariableSet": {
-        html: `<div>
-            <h3>✏️ Set Variable</h3>
-            <label>Name</label>
-            <select class="var-set-name"></select><br>
-            <label>Value</label>
-            <input class="var-set-value" type="text" />
-        </div>`,
-        inputs: 2, // exec, and value (could be 1 and let value come from UI or wire)
-        outputs: 1, // exec out (for chaining)
-        name: "VariableSet"
-        },
-
-        "Ransomware": {
-        html: `<div>
-        <h3>🖥️ Ransomware</h3>
-        <label>Ransom Note</label><br>
-        <textarea rows="6" style="width:100%;background:#1a1a1a;color:#fff;border:1px solid #555;font-family:monospace;font-size:14px;">
-        Hello, this is RansomJokey.
-        Your files have been encrypted.
-
-        Pay $300 in BTC to get the decryption key.
-        You have 48 hours or your files are gone forever.
-        </textarea>
-        </div>`,
-        inputs: 1, outputs: 1, name: "Ransomware"
-        },
-        "TriggerBSOD": {
-        html: `<div><h3>💀 Trigger BSOD</h3><small>Instant crash</small></div>`,
-        inputs: 1, outputs: 1, name: "TriggerBSOD"
-        },
-        "PopupSpam": {
-        html: `<div><h3>⚠️ Popup Spam</h3><label>Count</label><input type="number" value="10" min="1"></div>`,
-        inputs: 1, outputs: 1, name: "PopupSpam"
-        },
-        "Keylogger": {
-        html: `<div><h3>⌨️ Keylogger</h3><label>To file:</label><input value="log.txt"></div>`,
-        inputs: 1, outputs: 1, name: "Keylogger"
-        },
-        "CryptoMiner": {
-        html: `<div><h3>⛏️ Crypto Miner</h3><label>Mining Power</label><input type="range" min="1" max="100" value="30"></div>`,
-        inputs: 1, outputs: 1, name: "CryptoMiner"
-        },
-        "PopupShow": {
-        html: `<div><h3>⛏️ Popup Messagebox</h3><label>Mining Power</label><input type="text" value="placeholder text"></div>`,
-        inputs: 1, outputs: 1, name: "PopupShow"
-        },
-        "RAT": {
-        html: `<div><h3>🐀 RAT Backdoor</h3><label>Server</label><input value="127.0.0.1"></div>`,
-        inputs: 1, outputs: 1, name: "RAT"
-        },
-        "Delay": {
-        html: `<div><h3>🕒 Delay</h3><label>Duration (s)</label><input type="number" value="2"></div>`,
-        inputs: 1, outputs: 1, name: "Delay"
-        },
-        "End": {
-        html: `<div><h3>🕒 Do nothing, end.</h3><label>End Node</label></div>`,
-        inputs: 1, outputs: 0, name: "End"
-        }
-    };
 
     // Ak je už správny drawflow formát (obsahuje 'drawflow' a 'version'), importuj priamo
     if (json.drawflow && json.version) {
@@ -891,14 +1258,15 @@ function loadBlueprint(json) {
                 name: node.name,
                 class: node.class,
                 html: nodeInfo[node.name]?.html || `<div><h3>${node.name}</h3></div>`,
-                data: node.values || {},
+                data: node.values || {}, // <-- THIS IS CRUCIAL
+                values: node.values || {},
                 typenode: false,
                 pos_x: node.pos_x || 0,
                 pos_y: node.pos_y || 0,
-                // Štruktúra inputs/outputs nižšie
                 inputs: {},
                 outputs: {}
             };
+
 
             // PATCH INPUTS (Drawflow chce: {input_1:{connections:[...]}})
             for (const key in node.inputs || {}) {
@@ -938,7 +1306,7 @@ function loadBlueprint(json) {
             editor.clear();
             editor.import(drawflowFormat);
             setTimeout(() => {
-                autofillNodeInputs();
+                autofillNodeInputs(patchedNodes);
                 updateVariableDropdowns();
                 refreshAllVariablesFromDOM();
             }, 60);  // dávam 60ms, nech je istota že DOM nody sú už pridané

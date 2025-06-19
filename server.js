@@ -12,6 +12,21 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'menu.html'));
 });
 
+app.get('/blueprint', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'blueprint.html'));
+});
+
+app.get('/vm', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'vm.html'));
+});
+
+app.get('/map', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'map.html'));
+});
+
+app.get('/main', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 
 app.use(express.static('public'));
@@ -91,7 +106,7 @@ app.get('/creator/:filename', (req, res) => {
         console.error("❌ Reading file failed:", err);
         res.status(500).json({ error: "Failed to read file: " + err.message });
     }
-});     
+});
 
 app.listen(port, async () => {
     await loadWasm();

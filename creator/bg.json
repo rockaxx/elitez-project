@@ -1,12 +1,12 @@
 {
-  "name": "ransomware",
+  "name": "bg",
   "blueprint": {
     "1": {
       "id": 1,
-      "name": "Ransomware",
-      "class": "ransomware",
+      "name": "BackgroundChanger",
+      "class": "backgroundchanger",
       "values": {
-        "textarea": "        Hello, this is RansomJokey.\n        Your files have been encrypted.\n\n        Pay $300 in BTC to get the decryption key.\n        You have 48 hours or your files are gone forever.\n        "
+        "url": "https://w0.peakpx.com/wallpaper/209/381/HD-wallpaper-background-abstract-1-jpg-design-colors-blue-thumbnail.jpg"
       },
       "inputs": {
         "input_1": [
@@ -24,8 +24,8 @@
           }
         ]
       },
-      "pos_x": 873,
-      "pos_y": 323
+      "pos_x": 960,
+      "pos_y": 461
     },
     "2": {
       "id": 2,
@@ -41,8 +41,8 @@
           }
         ]
       },
-      "pos_x": 570,
-      "pos_y": 462
+      "pos_x": 649,
+      "pos_y": 496
     },
     "3": {
       "id": 3,
@@ -58,8 +58,8 @@
         ]
       },
       "outputs": {},
-      "pos_x": 1183,
-      "pos_y": 407
+      "pos_x": 1253,
+      "pos_y": 476
     }
   }
 }

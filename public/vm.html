@@ -404,19 +404,20 @@
                 break;
 
             case "PopupShow":
-                // Tu získaj message z values (u teba je to v "mining_power" podľa toho, čo je v node.values)
-                const msg =
-                    (node.values && (node.values.text || node.values.message || node.values.mining_power))
-                    || "Malware activity detected!";
-                popupShowMalware(msg);
+                let msg;
+                // If "use_variable" is true, use the incoming value (prevValue)
+                if (node.values && (node.values.use_variable || node.values.useVariable)) {
+                    msg = prevValue;
+                } else {
+                    msg = node.values && (node.values.value || node.values.text || node.values.message);
+                }
+                popupShowMalware(msg || "Malware activity detected!");
 
-                // pokračuj na ďalší node, ak existuje
                 setTimeout(() => {
                     const out = node.outputs.output_1?.[0]?.node;
-                    if (out) nextStep(out, prevValue);
+                    if (out) nextStep(out, prevValue); // Or msg, depends what you want to pass on
                 }, 500);
                 console.log('Step:', node.name, 'prevValue:', prevValue, 'vars:', JSON.stringify(vars));
-
                 break;
 
             case "ScreenMelter":
@@ -428,6 +429,19 @@
                     (node.values && (node.values.textarea||node.values.text || node.values.message || node.values.mining_power))
                     || "Ransomware message!";
                 RansomwareMalware(msgRansom);
+
+                // pokračuj na ďalší node, ak existuje
+                setTimeout(() => {
+                    const out = node.outputs.output_1?.[0]?.node;
+                    if (out) nextStep(out, prevValue);
+                }, 500);
+                break;
+
+            case "BackgroundChanger":
+                const msgBgChange =
+                    (node.values && (node.values.url))
+                    || "Url not found.";
+                ChangeBG(msgBgChange);
 
                 // pokračuj na ďalší node, ak existuje
                 setTimeout(() => {
@@ -458,7 +472,11 @@
     if (firstOut) nextStep(firstOut, undefined);
     }
 
-
+    function ChangeBG(url) {
+        if (!url) return alert("No URL provided for background change.");
+        document.body.style.background = `url('${url}') no-repeat center center fixed`;
+        document.body.style.backgroundSize = 'cover';
+    }
 
     function popupShowMalware(message) {
         new WinBox({
@@ -639,7 +657,7 @@
             <div style="font-size:29px;margin-bottom:28px;">
                 Your PC ran into a problem and needs to restart.<br>
                 We're just collecting some error info, and then we'll restart for you.<br><br>
-                <span style="font-size:21px;">If you'd like to know more, you can search online later for this error: <b>FAKE_BSOD</b></span>
+                <span style="font-size:21px;">If you'd like to know more, you can search online later for this error: <b>SYSTEM_FATAL_ERROR</b></span>
             </div>
             <button onclick="location.reload()" style="padding:12px 48px;font-size:23px;border-radius:9px;border:none;background:#fff;color:#002689;font-weight:bold;box-shadow:0 3px 30px #0008;cursor:pointer;margin-top:30px;">Restart PC</button>
             </div>
@@ -671,6 +689,7 @@
                 <div style='margin:12px 0;font-size:17px;cursor:pointer;' onclick='openExplorer()'>📁 File Explorer</div>
                 <div style='margin:12px 0;font-size:17px;cursor:pointer;' onclick='openTerminal()'>🖥️ Terminal</div>
                 <div style='margin:12px 0;font-size:17px;cursor:pointer;' onclick='runVirus()'>⚠️ Run Virus</div>
+                <div style='margin:12px 0;font-size:17px;cursor:pointer;' onclick='location.reload()'>🔁 Restart PC</div>
                </div>`
       });
     }
