@@ -1,107 +1,233 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Elite Z - Main Menu</title>
+
+  <!-- Futuristic font & icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" defer></script>
+  <!-- tsParticles for dynamic background -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.9.3/tsparticles.bundle.min.js" defer></script>
+
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: url('theme.avif') no-repeat center center fixed;
-      background-size: cover;
-      color: white;
+    :root {
+      --main-bg: url('theme.avif') center/cover no-repeat;
+      --overlay-color: rgba(0,0,0,0.3);
+      --accent: #0ff;
+      --accent-light: rgba(0,255,255,0.2);
+      --text: #0ff;
+      --menu-width: 300px;
+      --btn-height: 60px;
+      --status-height: 40px;
     }
 
-    .overlay {
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    /* Reset & full-screen */
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html, body{
+      width:100%; height:100%; overflow:hidden;
+      font-family:'Orbitron',sans-serif;
+      background:var(--main-bg); position:relative;
+    }
+    body::before{ content:''; position:absolute; inset:0; background:var(--overlay-color); }
+    body::after{
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(45deg, rgba(0,255,255,0.2), rgba(255,0,255,0.2), rgba(0,255,0,0.2));
+      background-size:600% 600%; animation:gradientShift 20s ease infinite;
+    }
+    @keyframes gradientShift{
+      0%,100%{background-position:0% 50%}
+      50%{background-position:100% 50%}
     }
 
-    .title {
-      font-size: 4em;
-      margin-bottom: 50px;
-      color: #00fff7;
-      font-weight: bold;
-      letter-spacing: 2px;
-      text-shadow: 0 0 10px #00fff7, 0 0 30px #ff00ff;
-      animation: flicker 2s infinite alternate;
+    /* Particle canvas */
+    #tsparticles{ position:absolute; inset:0; z-index:0; }
+
+    /* Status bar */
+    .status-bar{
+      position:absolute; top:0; left:0; width:100%; height:var(--status-height);
+      display:flex; align-items:center; gap:2rem; padding:0 1rem;
+      color:var(--text); font-size:0.9rem; z-index:2;
+    }
+    .status-item{ display:flex; align-items:center; gap:0.5rem; }
+
+    /* Layout grid */
+    .container{
+      position:relative; z-index:1;
+      display:grid; grid-template-columns:var(--menu-width) 1fr;
+      height:100%; padding-top:var(--status-height);
+      animation:slideIn 0.5s ease-out;
+    }
+    @keyframes slideIn{ from{transform:translateX(-50px);opacity:0} to{transform:translateX(0);opacity:1} }
+
+    /* Menu styling */
+    nav.menu{ position:relative; padding:2rem 1rem; height:100%; overflow-y:auto; }
+    nav.menu ul{ list-style:none; }
+    nav.menu li{
+      position:relative; height:var(--btn-height); line-height:var(--btn-height);
+      padding:0 1rem; margin-bottom:1rem;
+      color:var(--text); font-size:1.1rem; cursor:pointer;
+      display:flex; align-items:center; gap:0.75rem;
+      z-index:2; transition:transform 0.2s;
+    }
+    nav.menu li i{ font-size:1.4rem; }
+    nav.menu li:hover, nav.menu li:focus{ transform:scale(1.02); outline:none; }
+
+    /* Selector highlight */
+    nav.menu .selector{
+      position:absolute; top:0; left:0;
+      width:100%; height:var(--btn-height);
+      background:var(--accent-light);
+      border-left:4px solid var(--accent);
+      border-radius:0 1.25rem 1.25rem 0;
+      transition:top 0.3s;
+      z-index:1;
     }
 
-    @keyframes flicker {
-      0%   { opacity: 1; text-shadow: 0 0 10px #00fff7, 0 0 30px #ff00ff; }
-      100% { opacity: 0.9; text-shadow: 0 0 20px #00fff7, 0 0 60px #ff00ff; }
+    /* Preview panel */
+    .preview{
+      padding:2rem; color:#fff; display:flex; flex-direction:column;
+      justify-content:center; align-items:flex-start; text-shadow:0 0 5px #000;
     }
-
-    .menu-button {
-      width: 320px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 15px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 18px;
-      padding: 18px 30px;
-      margin: 12px 0;
-      font-size: 1.3em;
-      font-weight: 500;
-      color: #ffffff;
-      cursor: pointer;
-      box-shadow: 0 10px 30px rgba(255, 0, 180, 0.25);
-      backdrop-filter: blur(10px);
-      transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    .preview-title{ font-size:3rem; margin-bottom:1rem; }
+    .preview-desc{ font-size:1.2rem; margin-bottom:1.5rem; max-width:600px; }
+    /* Network info list */
+    .settings-list{
+      list-style:none; padding:0; font-size:1rem;
     }
-
-    .menu-button:hover {
-      transform: translateY(-5px) scale(1.05);
-      background: rgba(255, 255, 255, 0.12);
-      box-shadow: 0 0 30px rgba(255, 0, 180, 0.4);
-    }
-
-    .menu-button span.icon {
-      font-size: 1.5em;
-    }
-
-    .footer {
-      position: absolute;
-      bottom: 12px;
-      color: #ccc;
-      font-size: 0.85em;
-    }
+    .settings-list li{ margin-bottom:0.75rem; }
+    .settings-label{ font-weight:700; color:var(--accent); }
   </style>
 </head>
 <body>
-  <div class="overlay">
-    <div class="title">Elite Z</div>
-    <button class="menu-button" onclick="window.location.href=('/blueprint')">
-      <span class="icon">💻</span> Build Malware
-    </button>
-    <button class="menu-button" onclick="window.location.href=('/map')">
-      <span class="icon">🗺️</span> View World Map
-    </button>
-    <button class="menu-button" onclick="alert('Open hacker social network...')">
-      <span class="icon">📡</span> Hacker Network
-    </button>
-    <button class="menu-button" onclick="alert('Open mission log...')">
-      <span class="icon">📁</span> Mission Log
-    </button>
-    <button class="menu-button" onclick="window.location.href=('/vm')">
-      <span class="icon">🖥️</span> Virtual Machine
-    </button>
-    <button class="menu-button" onclick="alert('Exit game...')">
-      <span class="icon">🚪</span> Exit
-    </button>
-    <div class="footer">© 2025 Elite Hacker Studio | All Rights Controlled</div>
+  <!-- Particle network background -->
+  <div id="tsparticles"></div>
+
+  <!-- Top status bar -->
+  <div class="status-bar">
+    <div class="status-item"><i class="fas fa-microchip"></i> CPU: <span id="stat-cpu">—</span></div>
+    <div class="status-item"><i class="fas fa-wifi"></i> Net: <span id="stat-net">—</span></div>
+    <div class="status-item"><i class="fas fa-user-secret"></i> Rep: <span id="stat-rep">—</span></div>
   </div>
+
+  <div class="container">
+    <nav class="menu" role="menu" aria-label="Main Navigation">
+      <div class="selector"></div>
+      <ul>
+        <li data-index="0" tabindex="0"><i class="fas fa-code-branch"></i> Build Malware</li>
+        <li data-index="1" tabindex="0"><i class="fas fa-globe"></i> World Map</li>
+        <li data-index="2" tabindex="0"><i class="fas fa-satellite-dish"></i> Hacker Network</li>
+        <li data-index="3" tabindex="0"><i class="fas fa-folder-open"></i> Mission Log</li>
+        <li data-index="4" tabindex="0"><i class="fas fa-desktop"></i> Virtual Machine</li>
+        <!-- Only one extra: Settings -->
+        <li data-index="5" tabindex="0"><i class="fas fa-cog"></i> Settings</li>
+      </ul>
+    </nav>
+
+    <section class="preview" aria-live="polite">
+      <h2 class="preview-title">Build Malware</h2>
+      <p class="preview-desc">Design and customize potent malware modules to spread infection globally.</p>
+      <img class="preview-img" src="assets/blueprint.png" alt="Build Malware Preview"/>
+    </section>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Particles init
+      tsParticles.load('tsparticles', {
+        particles: {
+          number:{ value:80, density:{ enable:true, area:800 }},
+          color:{ value:['#0ff','#ff0','#f0f'] },
+          shape:{ type:'circle' },
+          opacity:{ value:0.3 },
+          size:{ value:{ min:1, max:3 } },
+          move:{ enable:true, speed:1, outModes:'out' },
+          links:{ enable:true, distance:150, color:'#0ff', opacity:0.2, width:1 }
+        },
+        interactivity:{
+          events:{ onhover:{ enable:true, mode:'grab' }, onclick:{ enable:true, mode:'push' } },
+          modes:{ grab:{ distance:200, links:{ opacity:0.5 } }, push:{ quantity:4 } }
+        }
+      });
+
+      // Mock status updates
+      setInterval(() => {
+        document.getElementById('stat-cpu').textContent = Math.floor(50 + Math.random()*50) + '%';
+        document.getElementById('stat-net').textContent = Math.floor(80 + Math.random()*100) + ' kb/s';
+        document.getElementById('stat-rep').textContent = Math.floor(Math.random()*100) + '/100';
+      }, 3000);
+
+      const items       = Array.from(document.querySelectorAll('nav.menu li'));
+      const selector    = document.querySelector('.selector');
+      const preview     = document.querySelector('.preview');
+      const titleEl     = preview.querySelector('.preview-title');
+      const descEl      = preview.querySelector('.preview-desc');
+      const imgEl       = preview.querySelector('.preview-img');
+
+      // Paths (example)
+      const paths = ['/blueprint','/map','/network','/log','/vm','/settings'];
+
+    const data = [
+      { title:'Build Malware', desc:'Design and customize potent malware modules to spread infection globally.', img:'assets/blueprint.png', width: 700, height: 600 },
+      { title:'World Map',     desc:'Zoom and analyze infection hotspots across the globe.',                    img:'assets/map_preview.png', width: 500, height: 300 },
+      { title:'Hacker Network',desc:'Connect with underground mercenaries and allies.',                         img:'assets/network_preview.png', width: 450, height: 250 },
+      { title:'Mission Log',   desc:'Review past operations and their outcomes.',                               img:'assets/log_preview.png', width: 420, height: 240 },
+      { title:'Virtual Machine',desc:'Test malware in a secure sandboxed environment.',                         img:'assets/vm.png', width: 700, height: 600 },
+      { title:'Settings',      desc:'' }
+    ];
+
+      let current = 0;
+      function updateMenu(i) {
+        current = i;
+        items.forEach(el => el.classList.remove('active'));
+        items[current].classList.add('active');
+        selector.style.top = items[current].offsetTop + 'px';
+
+        const entry = data[current];
+        titleEl.textContent = entry.title;
+
+        // If "Settings", render network info list
+        if (entry.title === 'Settings') {
+          descEl.innerHTML = `
+            <ul class="settings-list">
+              <li><span class="settings-label">IP Address:</span> 192.168.1.42</li>
+              <li><span class="settings-label">Subnet Mask:</span> 255.255.255.0</li>
+              <li><span class="settings-label">Gateway:</span> 192.168.1.1</li>
+              <li><span class="settings-label">DNS:</span> 8.8.8.8, 8.8.4.4</li>
+              <li><span class="settings-label">MAC Address:</span> AB:CD:EF:12:34:56</li>
+              <li><span class="settings-label">Hostname:</span> ELITE-Z-NODE</li>
+            </ul>`;
+          imgEl.style.display = 'none';
+          } else {
+            descEl.textContent = entry.desc;
+            imgEl.src = entry.img;
+            imgEl.style.display = 'block';
+            imgEl.style.width = (entry.width || 500) + 'px';   // fallback default
+            imgEl.style.height = (entry.height || 500) + 'px';
+            imgEl.style.objectFit = 'contain';
+          }
+      }
+
+      items.forEach((item, idx) => {
+        item.addEventListener('mouseenter', () => updateMenu(idx));
+        item.addEventListener('click', () => window.location.href = paths[idx]);
+      });
+
+      document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          let dir = e.key === 'ArrowDown' ? 1 : -1;
+          updateMenu((current + dir + items.length) % items.length);
+          items[current].focus();
+          e.preventDefault();
+        }
+        if (e.key === 'Enter') items[current].click();
+      });
+
+      updateMenu(0);
+    });
+  </script>
+
+  <div class="footer">© 2025 Elite Hacker Studio | All Rights Controlled</div>
 </body>
 </html>

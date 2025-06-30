@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elite Z – Settings</title>
+
+  <!-- Futuristic font & icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" defer></script>
+  <!-- tsParticles for ambient animated background -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.9.3/tsparticles.bundle.min.js" defer></script>
+
+  <style>
+    :root {
+      --bg-img: url('theme.avif');
+      --overlay-color: rgba(0, 0, 0, 0.5);
+      --accent: #0ff;
+      --accent-light: rgba(0, 255, 255, 0.2);
+      --text: #e0f7fa;
+      --panel-bg: rgba(255, 255, 255, 0.05);
+      --panel-border: rgba(255, 255, 255, 0.2);
+      --glass-blur: blur(10px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: 'Orbitron', sans-serif;
+      background: var(--bg-img) center/cover no-repeat;
+      position: relative;
+    }
+    body::before {
+      content: ''; position: absolute; inset: 0;
+      background: var(--overlay-color);
+      backdrop-filter: var(--glass-blur);
+      z-index: 0;
+    }
+    body::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(60deg, rgba(0,255,255,0.1), rgba(255,0,255,0.1));
+      background-size: 300% 300%;
+      animation: gradientShift 30s ease infinite;
+      z-index: 1;
+    }
+    @keyframes gradientShift {
+      0%,100%{ background-position:0% 50%; }
+      50%{ background-position:100% 50%; }
+    }
+    #tsparticles { position: absolute; inset: 0; z-index: 2; }
+
+    .container {
+      position: relative; z-index: 3;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      height: 100%;
+      overflow: hidden;
+      animation: fadeIn 0.8s ease-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Sidebar Navigation */
+    nav.sidebar {
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: var(--glass-blur);
+      border-right: 1px solid var(--panel-border);
+    }
+    nav.sidebar ul { list-style: none; }
+    nav.sidebar li {
+      position: relative;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      color: var(--text);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    nav.sidebar li::before {
+      content: '';
+      position: absolute; left: 0; top: 0;
+      height: 100%; width: 4px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform 0.3s;
+    }
+    nav.sidebar li.active::before,
+    nav.sidebar li:hover::before {
+      transform: scaleY(1);
+    }
+    nav.sidebar li:hover,
+    nav.sidebar li.active { color: var(--accent); }
+    nav.sidebar i { margin-right: 0.75rem; }
+
+    /* Main Settings Panel */
+    .settings-panel {
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      overflow-y: auto;
+      color: #fff;
+    }
+    .settings-panel h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 10px rgba(0,0,0,0.7);
+      animation: slideIn 0.8s ease-out;
+    }
+    @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      backdrop-filter: var(--glass-blur);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      opacity: 0;
+      transform: translateX(20px);
+      animation: panelIn 0.5s forwards;
+    }
+    @keyframes panelIn {
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .panel h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+    .field {
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s;
+    }
+    .field:hover { transform: translateX(4px); }
+    .field label {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .field input[type="text"],
+    .field select,
+    .field input[type="number"] {
+      padding: 0.6rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.4);
+      transition: background 0.3s;
+    }
+    .field input:focus,
+    .field select:focus { background: rgba(255,255,255,0.2); outline: none; }
+    .field input[type="range"] { width: 100%; }
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .toggle input { transform: scale(1.2); cursor: pointer; }
+
+    /* Animation delay utilities */
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+
+    /* Custom Scrollbar */
+    .settings-panel::-webkit-scrollbar { width: 8px; }
+    .settings-panel::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="tsparticles"></div>
+  <div class="container">
+    <nav class="sidebar">
+      <ul>
+        <li class="active" data-panel="network"><i class="fas fa-wifi"></i> Network</li>
+        <li data-panel="audio"><i class="fas fa-volume-up"></i> Audio</li>
+        <li data-panel="graphics"><i class="fas fa-display"></i> Graphics</li>
+        <li data-panel="controls"><i class="fas fa-gamepad"></i> Controls</li>
+        <li data-panel="saveandback"><i class="fas fa-gamepad"></i> Save & Go Back</li>
+        <li data-panel="save"><i class="fas fa-gamepad"></i> Save</li>
+        <li data-panel="cancelandback"><i class="fas fa-gamepad"></i> Cancel & Go Back</li>
+        <li data-panel="revert"><i class="fas fa-gamepad"></i> Revert to default</li>
+      </ul>
+    </nav>
+
+    <section class="settings-panel">
+      <h1>Settings</h1>
+
+      <div id="network" class="panel delay-1">
+        <h2>Network Info</h2>
+        <div class="field"><label>IP Address</label><input type="text" value="192.168.1.42" readonly/></div>
+        <div class="field"><label>Subnet Mask</label><input type="text" value="255.255.255.0" readonly/></div>
+        <div class="field"><label>Gateway</label><input type="text" value="192.168.1.1" readonly/></div>
+        <div class="field"><label>DNS Servers</label><input type="text" value="8.8.8.8, 8.8.4.4" readonly/></div>
+        <div class="field"><label>MAC Address</label><input type="text" value="AB:CD:EF:12:34:56" readonly/></div>
+        <div class="field"><label>Hostname</label><input type="text" value="ELITE-Z-NODE" readonly/></div>
+      </div>
+
+      <div id="audio" class="panel delay-2" style="display:none;">
+        <h2>Audio</h2>
+        <div class="field"><label>Master Volume</label><input type="range" min="0" max="100" value="80"/></div>
+        <div class="field"><label>Music Volume</label><input type="range" min="0" max="100" value="60"/></div>
+        <div class="field toggle"><input type="checkbox" id="mute"/><label for="mute">Mute All</label></div>
+      </div>
+
+      <div id="graphics" class="panel delay-3" style="display:none;">
+        <h2>Graphics</h2>
+        <div class="field"><label>Resolution</label><select><option>1920×1080</option><option>1600×900</option><option>1280×720</option></select></div>
+        <div class="field toggle"><input type="checkbox" id="fullscreen"/><label for="fullscreen">Fullscreen</label></div>
+        <div class="field toggle"><input type="checkbox" id="vsync"/><label for="vsync">V-Sync</label></div>
+      </div>
+
+      <div id="controls" class="panel delay-4" style="display:none;">
+        <h2>Controls</h2>
+        <div class="field"><label>Mouse Sensitivity</label><input type="number" min="1" max="20" value="10"/></div>
+        <div class="field toggle"><input type="checkbox" id="invert"/><label for="invert">Invert Y-Axis</label></div>
+        <div class="field"><label>Key Bindings</label><select><option>Default</option><option>Custom</option></select></div>
+      </div>
+
+    </section>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      tsParticles.load('tsparticles', {
+        particles: { number:{ value:80, density:{ enable:true, area:800 }}, color:{ value:['#0ff','#0f0','#f0f'] }, shape:{ type:'circle' }, opacity:{ value:0.25 }, size:{ value:{ min:1, max:4 } }, move:{ enable:true, speed:1.2, outModes:'out' }, links:{ enable:true, distance:140, color:'#0ff', opacity:0.2, width:1 } },
+        interactivity:{ events:{ onhover:{ enable:true, mode:'grab' }, onclick:{ enable:true, mode:'push' } }, modes:{ grab:{ distance:180, links:{ opacity:0.5 } }, push:{ quantity:3 } } }
+      });
+
+      const tabs = document.querySelectorAll('nav.sidebar li');
+      const panels = document.querySelectorAll('.settings-panel .panel');
+      tabs.forEach(tab => tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        panels.forEach(p => p.style.display = 'none');
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.panel).style.display = 'block';
+      }));
+    });
+  </script>
+</body>
+</html>
