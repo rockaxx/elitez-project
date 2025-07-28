@@ -17,7 +17,7 @@ app.get('/blueprint', (req, res) => {
 });
 
 app.get('/vm', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'vm.html'));
+    res.sendFile(path.join(__dirname, 'public', 'sandbox/vm.html'));
 });
 
 app.get('/map', (req, res) => {
