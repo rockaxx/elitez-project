@@ -28,8 +28,12 @@ app.get('/main', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/main', (req, res) => {
+app.get('/settings', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'settings/settings.html'));
+});
+
+app.get('/subscription', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'shop.html'));
 });
 
 
