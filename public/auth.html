@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elite Z – Access Control</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      font-family: 'Orbitron', sans-serif;
+      color: #e2f1ff;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      padding: 2.5rem 2rem;
+      background: rgba(10, 25, 47, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      box-shadow: 0 25px 50px rgba(2, 6, 23, 0.45);
+      backdrop-filter: blur(8px);
+    }
+
+    h1 {
+      margin: 0 0 1.5rem;
+      font-size: 1.8rem;
+      text-align: center;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .tabs button {
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(94, 234, 212, 0.4);
+      border-radius: 999px;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: background 0.2s ease, color 0.2s ease, border 0.2s ease;
+    }
+
+    .tabs button.active,
+    .tabs button:hover {
+      background: rgba(94, 234, 212, 0.1);
+      color: #f8fafc;
+      border-color: rgba(94, 234, 212, 0.7);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: #cbd5f5;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: rgba(15, 23, 42, 0.65);
+      color: #e2e8f0;
+      font-size: 1rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: rgba(94, 234, 212, 0.7);
+      box-shadow: 0 0 0 2px rgba(94, 234, 212, 0.2);
+    }
+
+    .primary-button {
+      margin-top: 0.5rem;
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #22d3ee, #6366f1);
+      color: #020617;
+      border: none;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .primary-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.35);
+    }
+
+    .message {
+      min-height: 1.5rem;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .message.error {
+      color: #fda4af;
+    }
+
+    .message.success {
+      color: #6ee7b7;
+    }
+
+    .links {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    .links a {
+      color: #38bdf8;
+      text-decoration: none;
+    }
+
+    @media (max-width: 540px) {
+      .container {
+        margin: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="modeTitle">Agent Login</h1>
+    <div class="tabs">
+      <button type="button" class="active" data-mode="login">Login</button>
+      <button type="button" data-mode="register">Register</button>
+    </div>
+    <form id="authForm">
+      <div>
+        <label for="username">Codename</label>
+        <input id="username" name="username" type="text" maxlength="32" autocomplete="username" required>
+      </div>
+      <div>
+        <label for="password">Passphrase</label>
+        <input id="password" name="password" type="password" minlength="6" autocomplete="current-password" required>
+      </div>
+      <div id="confirmGroup" style="display:none;">
+        <label for="confirmPassword">Confirm Passphrase</label>
+        <input id="confirmPassword" name="confirmPassword" type="password" minlength="6" autocomplete="new-password">
+      </div>
+      <button class="primary-button" type="submit">Authorize</button>
+    </form>
+    <div id="message" class="message"></div>
+    <div class="links">
+      <a href="/">Back to menu</a>
+    </div>
+  </div>
+
+  <script src="assets/client-api.js"></script>
+  <script>
+    (function () {
+      const tabs = document.querySelectorAll('.tabs button');
+      const form = document.getElementById('authForm');
+      const messageEl = document.getElementById('message');
+      const modeTitle = document.getElementById('modeTitle');
+      const confirmGroup = document.getElementById('confirmGroup');
+      let mode = 'login';
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => setMode(tab.dataset.mode));
+      });
+
+      function setMode(nextMode) {
+        mode = nextMode;
+        tabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.mode === mode));
+        confirmGroup.style.display = mode === 'register' ? 'block' : 'none';
+        modeTitle.textContent = mode === 'register' ? 'Create Credentials' : 'Agent Login';
+        message('');
+        form.reset();
+      }
+
+      function message(text, isError) {
+        messageEl.textContent = text || '';
+        messageEl.classList.toggle('error', Boolean(isError));
+        messageEl.classList.toggle('success', Boolean(text && !isError));
+      }
+
+      async function checkExistingSession() {
+        try {
+          const session = await API.request('/api/auth/session', { skipRedirect: true });
+          if (session && session.authenticated) {
+            window.location.href = '/production.html';
+          }
+        } catch (err) {
+          // ignore
+        }
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        message('');
+        const username = form.username.value.trim();
+        const password = form.password.value;
+
+        if (!username || !password) {
+          message('Codename and passphrase are required.', true);
+          return;
+        }
+
+        if (mode === 'register') {
+          const confirmation = form.confirmPassword.value;
+          if (password !== confirmation) {
+            message('Passphrases do not match.', true);
+            return;
+          }
+        }
+
+        try {
+          const endpoint = mode === 'register' ? '/api/auth/register' : '/api/auth/login';
+          const payload = { username, password };
+          const response = await API.request(endpoint, { method: 'POST', body: payload, skipRedirect: true });
+          if (response && response.token) {
+            API.setToken(response.token);
+            message('Access granted. Redirecting...', false);
+            setTimeout(() => {
+              window.location.href = '/production.html';
+            }, 600);
+          } else {
+            message('Unexpected response from server.', true);
+          }
+        } catch (err) {
+          const text = (err && err.data && err.data.error) || err.message || 'Authorization failed.';
+          message(text, true);
+        }
+      });
+
+      checkExistingSession();
+    })();
+  </script>
+</body>
+</html>

@@ -176,6 +176,74 @@
       background: rgba(255,255,255,0.2);
       border-radius: 4px;
     }
+
+    .subscription-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .tier-card {
+      position: relative;
+      background: rgba(12, 24, 36, 0.7);
+      border: 1px solid rgba(148, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 1.8rem 1.4rem;
+      text-align: center;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+      overflow: hidden;
+    }
+
+    .tier-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(140deg, rgba(56, 189, 248, 0.15), transparent 55%);
+      pointer-events: none;
+    }
+
+    .tier-card h2 {
+      font-size: 1.4rem;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .tier-card .price {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #f0fdfd;
+    }
+
+    .tier-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0 1.25rem;
+      display: grid;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: rgba(224, 247, 250, 0.85);
+    }
+
+    .tier-card button {
+      border: 1px solid rgba(56, 189, 248, 0.6);
+      background: rgba(56, 189, 248, 0.2);
+      color: #e0f7fa;
+      padding: 0.65rem 1.5rem;
+      border-radius: 999px;
+      font-family: inherit;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .tier-card button:hover {
+      background: rgba(56, 189, 248, 0.35);
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
@@ -192,6 +260,39 @@
 
     <section class="settings-panel">
       <h1>SHOP SUBS</h1>
+      <div class="subscription-grid">
+        <article class="tier-card">
+          <h2>Standard</h2>
+          <p class="price">$9.99 / month</p>
+          <ul>
+            <li>Core infection analytics dashboard</li>
+            <li>Deploy up to 5 malware campaigns daily</li>
+            <li>Community command channel access</li>
+          </ul>
+          <button type="button">Choose Standard</button>
+        </article>
+        <article class="tier-card">
+          <h2>Mid</h2>
+          <p class="price">$19.99 / month</p>
+          <ul>
+            <li>Advanced obfuscation toolchain</li>
+            <li>20 daily deployments &amp; regional targeting</li>
+            <li>Priority operator assistance</li>
+          </ul>
+          <button type="button">Choose Mid</button>
+        </article>
+        <article class="tier-card">
+          <h2>High</h2>
+          <p class="price">$39.99 / month</p>
+          <ul>
+            <li>Unlimited global campaigns with auto-scaling</li>
+            <li>Dedicated strategist &amp; A/B payload testing</li>
+            <li>Early access to experimental modules</li>
+          </ul>
+          <button type="button">Choose High</button>
+        </article>
+      </div>
+    </section>
 
   </div>
 
@@ -203,12 +304,9 @@
       });
 
       const tabs = document.querySelectorAll('nav.sidebar li');
-      const panels = document.querySelectorAll('.settings-panel .panel');
       tabs.forEach(tab => tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
-        panels.forEach(p => p.style.display = 'none');
         tab.classList.add('active');
-        document.getElementById(tab.dataset.panel).style.display = 'block';
       }));
     });
   </script>

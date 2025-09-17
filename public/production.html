@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elite Z – Production Command</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: radial-gradient(circle at 20% 20%, rgba(45, 212, 191, 0.2), transparent 55%),
+            radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.2), transparent 60%),
+            #020617;
+      --panel: rgba(15, 23, 42, 0.78);
+      --panel-border: rgba(94, 234, 212, 0.25);
+      --accent: #38bdf8;
+      --accent-strong: #22d3ee;
+      --text: #e0f2fe;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Orbitron', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem clamp(1rem, 4vw, 3rem);
+      gap: 1.5rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .title {
+      font-size: clamp(1.5rem, 3vw, 2.4rem);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .user-box {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 0.75rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--panel-border);
+      font-size: 0.85rem;
+    }
+
+    .logout-button {
+      background: transparent;
+      border: 1px solid rgba(248, 113, 113, 0.6);
+      color: #fca5a5;
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: 0.08em;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .logout-button:hover {
+      background: rgba(248, 113, 113, 0.2);
+      transform: translateY(-1px);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 1.8rem;
+      box-shadow: 0 20px 40px rgba(2, 6, 23, 0.45);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 0.45rem;
+      color: rgba(226, 232, 240, 0.8);
+    }
+
+    select,
+    input[type="range"] {
+      width: 100%;
+    }
+
+    select {
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: rgba(15, 23, 42, 0.65);
+      color: var(--text);
+      font-family: inherit;
+      letter-spacing: 0.05em;
+    }
+
+    input[type="range"] {
+      appearance: none;
+      height: 6px;
+      border-radius: 6px;
+      background: rgba(148, 163, 184, 0.35);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 1px solid rgba(14, 165, 233, 0.6);
+    }
+
+    .range-value {
+      font-size: 0.8rem;
+      color: rgba(148, 163, 184, 0.9);
+      margin-top: 0.4rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #22d3ee, #6366f1);
+      border: none;
+      color: #020617;
+      padding: 0.8rem 1.4rem;
+      border-radius: 999px;
+      cursor: pointer;
+      letter-spacing: 0.12em;
+      font-family: inherit;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 15px 35px rgba(99, 102, 241, 0.35);
+    }
+
+    .link-button {
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      padding: 0.75rem 1.2rem;
+      border-radius: 999px;
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      transition: background 0.2s ease;
+    }
+
+    .link-button:hover {
+      background: rgba(56, 189, 248, 0.15);
+    }
+
+    .status-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .status-item {
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+    }
+
+    .deployments-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .deployments-list li {
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      font-size: 0.85rem;
+    }
+
+    .deployments-list span {
+      color: rgba(148, 163, 184, 0.9);
+    }
+
+    .empty-state {
+      text-align: center;
+      font-size: 0.85rem;
+      color: rgba(148, 163, 184, 0.7);
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 960px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">Production Command</div>
+    <div class="user-box">
+      <span>Logged in as <strong id="agentName">—</strong></span>
+      <button id="logoutBtn" class="logout-button">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Malware Assembly</h2>
+      <div class="form-grid">
+        <div>
+          <label for="blueprintSelect">Blueprint</label>
+          <select id="blueprintSelect">
+            <option value="">No blueprint armed</option>
+          </select>
+        </div>
+        <div>
+          <label for="malwareQuality">Malware Quality <span class="range-value" id="qualityValue">0.50</span></label>
+          <input id="malwareQuality" type="range" min="0" max="1" step="0.01" value="0.5">
+        </div>
+        <div>
+          <label for="spreadValue">Spread <span class="range-value" id="spreadLabel">0.50</span></label>
+          <input id="spreadValue" type="range" min="0" max="1" step="0.01" value="0.5">
+        </div>
+        <div>
+          <label for="stealthValue">Stealth <span class="range-value" id="stealthLabel">0.50</span></label>
+          <input id="stealthValue" type="range" min="0" max="1" step="0.01" value="0.5">
+        </div>
+        <div>
+          <label for="resilienceValue">Resilience <span class="range-value" id="resilienceLabel">0.50</span></label>
+          <input id="resilienceValue" type="range" min="0" max="1" step="0.01" value="0.5">
+        </div>
+      </div>
+      <div class="actions">
+        <button id="saveConfig" class="primary">Save Loadout</button>
+        <button id="openMap" class="link-button">Open World Map</button>
+        <button id="refreshConfig" class="link-button">Refresh</button>
+      </div>
+      <div id="saveMessage" class="range-value"></div>
+    </section>
+
+    <section class="card">
+      <h2>Current Status</h2>
+      <ul class="status-list">
+        <li class="status-item"><span>Armed Blueprint</span><strong id="statusBlueprint">None</strong></li>
+        <li class="status-item"><span>Malware Quality</span><strong id="statusQuality">0.50</strong></li>
+        <li class="status-item"><span>Spread / Stealth / Resilience</span><strong id="statusAttributes">0.50 / 0.50 / 0.50</strong></li>
+      </ul>
+      <div class="empty-state">Deployment data updates once infections are launched.</div>
+    </section>
+  </main>
+
+  <section class="card" style="margin-bottom: 2rem;">
+    <h2>Recent Deployments</h2>
+    <ul id="deploymentList" class="deployments-list"></ul>
+    <div id="noDeployments" class="empty-state">No malware deployments recorded yet.</div>
+  </section>
+
+  <script src="assets/client-api.js"></script>
+  <script>
+    (function () {
+      const blueprintSelect = document.getElementById('blueprintSelect');
+      const qualityRange = document.getElementById('malwareQuality');
+      const spreadRange = document.getElementById('spreadValue');
+      const stealthRange = document.getElementById('stealthValue');
+      const resilienceRange = document.getElementById('resilienceValue');
+      const qualityValue = document.getElementById('qualityValue');
+      const spreadLabel = document.getElementById('spreadLabel');
+      const stealthLabel = document.getElementById('stealthLabel');
+      const resilienceLabel = document.getElementById('resilienceLabel');
+      const statusBlueprint = document.getElementById('statusBlueprint');
+      const statusQuality = document.getElementById('statusQuality');
+      const statusAttributes = document.getElementById('statusAttributes');
+      const saveMessage = document.getElementById('saveMessage');
+      const deploymentList = document.getElementById('deploymentList');
+      const noDeployments = document.getElementById('noDeployments');
+      const agentName = document.getElementById('agentName');
+
+      document.getElementById('saveConfig').addEventListener('click', saveLoadout);
+      document.getElementById('openMap').addEventListener('click', () => {
+        window.location.href = '/map';
+      });
+      document.getElementById('refreshConfig').addEventListener('click', () => {
+        refreshProfile();
+        loadDeployments();
+      });
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await API.logout();
+        window.location.href = '/auth.html';
+      });
+
+      [qualityRange, spreadRange, stealthRange, resilienceRange].forEach((range) => {
+        range.addEventListener('input', updateRangeLabels);
+      });
+
+      function updateRangeLabels() {
+        qualityValue.textContent = Number(qualityRange.value).toFixed(2);
+        spreadLabel.textContent = Number(spreadRange.value).toFixed(2);
+        stealthLabel.textContent = Number(stealthRange.value).toFixed(2);
+        resilienceLabel.textContent = Number(resilienceRange.value).toFixed(2);
+      }
+
+      async function init() {
+        try {
+          const session = await API.ensureAuthenticated();
+          if (session.user) {
+            agentName.textContent = session.user.username;
+          }
+          await loadBlueprints();
+          await refreshProfile();
+          await loadDeployments();
+        } catch (err) {
+          console.error('Failed to initialize production view:', err);
+        }
+      }
+
+      async function loadBlueprints() {
+        try {
+          const files = await API.request('/allCreatorFiles', { skipRedirect: true });
+          while (blueprintSelect.options.length > 1) {
+            blueprintSelect.remove(1);
+          }
+          (files || []).forEach((file) => {
+            const option = document.createElement('option');
+            option.value = file.name;
+            option.textContent = file.name;
+            blueprintSelect.appendChild(option);
+          });
+        } catch (err) {
+          console.warn('Unable to load blueprints:', err);
+        }
+      }
+
+      function applyConfig(config) {
+        if (!config) {
+          return;
+        }
+        blueprintSelect.value = config.selectedBlueprint || '';
+        qualityRange.value = Number(config.malwareQuality || 0.5);
+        spreadRange.value = Number(config.attributes?.spread || 0.5);
+        stealthRange.value = Number(config.attributes?.stealth || 0.5);
+        resilienceRange.value = Number(config.attributes?.resilience || 0.5);
+        updateRangeLabels();
+        statusBlueprint.textContent = config.selectedBlueprint || 'None';
+        statusQuality.textContent = Number(config.malwareQuality || 0.5).toFixed(2);
+        statusAttributes.textContent = [
+          Number(config.attributes?.spread || 0.5).toFixed(2),
+          Number(config.attributes?.stealth || 0.5).toFixed(2),
+          Number(config.attributes?.resilience || 0.5).toFixed(2)
+        ].join(' / ');
+      }
+
+      async function refreshProfile() {
+        try {
+          const data = await API.request('/api/profile', { skipRedirect: true });
+          applyConfig(data?.config);
+          if (data?.user) {
+            agentName.textContent = data.user.username;
+          }
+        } catch (err) {
+          console.error('Unable to fetch profile:', err);
+        }
+      }
+
+      async function loadDeployments() {
+        try {
+          const response = await API.request('/api/world/deployments', { skipRedirect: true });
+          deploymentList.innerHTML = '';
+          const deployments = response?.deployments || [];
+          if (!deployments.length) {
+            noDeployments.style.display = 'block';
+            return;
+          }
+          noDeployments.style.display = 'none';
+          deployments.forEach((entry) => {
+            const li = document.createElement('li');
+            const country = document.createElement('strong');
+            country.textContent = entry.country;
+            const meta = document.createElement('span');
+            const blueprint = entry.blueprint ? `Blueprint: ${entry.blueprint}` : 'Manual deployment';
+            meta.textContent = `${blueprint} • ${new Date(entry.created_at).toLocaleString()}`;
+            li.appendChild(country);
+            li.appendChild(meta);
+            deploymentList.appendChild(li);
+          });
+        } catch (err) {
+          console.error('Unable to load deployments:', err);
+        }
+      }
+
+      async function saveLoadout() {
+        saveMessage.textContent = '';
+        const payload = {
+          selectedBlueprint: blueprintSelect.value || null,
+          malwareQuality: Number(qualityRange.value),
+          attributes: {
+            spread: Number(spreadRange.value),
+            stealth: Number(stealthRange.value),
+            resilience: Number(resilienceRange.value)
+          }
+        };
+        try {
+          const response = await API.request('/api/profile', { method: 'PUT', body: payload, skipRedirect: true });
+          applyConfig(response?.config);
+          saveMessage.textContent = 'Loadout saved successfully.';
+          saveMessage.style.color = '#6ee7b7';
+        } catch (err) {
+          saveMessage.textContent = (err?.data?.error) || err.message || 'Failed to save loadout.';
+          saveMessage.style.color = '#fda4af';
+        }
+      }
+
+      updateRangeLabels();
+      init();
+    })();
+  </script>
+</body>
+</html>
