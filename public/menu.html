@@ -8,23 +8,81 @@
 <body>
   <div class="container">
     <h1 class="title">ELITE Z</h1>
-    <button class="menu-button" onclick="startGame()">Start</button>
+    <button class="menu-button" onclick="openProduction()">Production</button>
+    <button class="menu-button" onclick="openMap()">World Map</button>
+    <button class="menu-button" onclick="openShop()">Subscription</button>
     <button class="menu-button" onclick="openSettings()">Settings</button>
-    <button class="menu-button" onclick="showCredits()">Credits</button>
+    <div class="auth-status">
+      <span id="authStatus">Checking credentials...</span>
+      <button id="authAction" class="menu-button secondary">Login</button>
+    </div>
   </div>
 
+  <script src="assets/client-api.js"></script>
   <script>
-    function startGame() {
-      location.href = "index.html"; // real redirect
+    async function ensureAuthSession() {
+      const status = document.getElementById('authStatus');
+      const action = document.getElementById('authAction');
+      const token = API.getToken();
+      if (!token) {
+        status.textContent = 'Not authenticated';
+        action.textContent = 'Login / Register';
+        action.dataset.mode = 'login';
+        return;
+      }
+      try {
+        const session = await API.request('/api/auth/session', { skipRedirect: true });
+        if (session && session.authenticated && session.user) {
+          status.textContent = `Welcome, ${session.user.username}`;
+          action.textContent = 'Logout';
+          action.dataset.mode = 'logout';
+          return;
+        }
+      } catch (err) {
+        console.warn('Session check failed:', err);
+      }
+      API.clearToken();
+      status.textContent = 'Session expired';
+      action.textContent = 'Login / Register';
+      action.dataset.mode = 'login';
+    }
+
+    function requireAuth(destination) {
+      const token = API.getToken();
+      if (!token) {
+        window.location.href = '/auth.html';
+        return;
+      }
+      window.location.href = destination;
+    }
+
+    function openProduction() {
+      requireAuth('/production');
+    }
+
+    function openMap() {
+      requireAuth('/map');
+    }
+
+    function openShop() {
+      window.location.href = '/subscription';
     }
 
     function openSettings() {
-      alert("⚙️ Settings not implemented yet.");
+      window.location.href = '/settings';
     }
 
-    function showCredits() {
-      alert("👤 Created by EliteDev.");
-    }
+    document.getElementById('authAction').addEventListener('click', async () => {
+      const mode = document.getElementById('authAction').dataset.mode;
+      if (mode === 'logout') {
+        await API.logout();
+        ensureAuthSession();
+      } else {
+        window.location.href = '/auth.html';
+      }
+    });
+
+    ensureAuthSession();
   </script>
 </body>
 </html>

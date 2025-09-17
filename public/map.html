@@ -2,115 +2,539 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Elite Z - World Infection Map</title>
+  <title>Elite Z – World Deployment Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     html, body {
-    margin: 0;
-    height: 100%;
-    background-color: #0f0f0f;
-    overflow: hidden;
+      margin: 0;
+      height: 100%;
+      background-color: #020617;
+      color: #e0f2fe;
+      font-family: 'Orbitron', sans-serif;
+      overflow: hidden;
+    }
+
+    .banner {
+      position: relative;
+      padding: 1rem 1.5rem;
+      text-align: center;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: rgba(15, 23, 42, 0.85);
+      box-shadow: 0 6px 18px rgba(2, 6, 23, 0.45);
+      z-index: 5;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      height: calc(100% - 74px);
     }
 
     #map {
-    height: 100%;
-    width: 100%;
-    background-color: #0f0f0f; /* FIXES visible gaps */
+      width: 100%;
+      height: 100%;
+      background-color: #0f172a;
     }
 
-    .title-banner {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 999;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 10px 25px;
-    border-radius: 12px;
-    color: #00ffe0;
-    font-family: monospace;
-    font-size: 24px;
-    text-shadow: 0 0 10px #00ffe0, 0 0 20px #ff00ff;
+    .control-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: rgba(15, 23, 42, 0.92);
+      border-left: 1px solid rgba(148, 163, 184, 0.25);
+      padding: 1.5rem;
+      overflow-y: auto;
     }
 
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0.14em;
+    }
+
+    .ghost-btn {
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: transparent;
+      color: #94a3b8;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: 0.08em;
+      transition: border 0.2s ease, color 0.2s ease;
+    }
+
+    .ghost-btn:hover {
+      color: #e0f2fe;
+      border-color: rgba(56, 189, 248, 0.7);
+    }
+
+    .panel-section {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .panel-section .label {
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(148, 163, 184, 0.75);
+    }
+
+    .panel-section strong {
+      font-size: 1.05rem;
+      letter-spacing: 0.04em;
+    }
+
+    .panel-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #22d3ee, #6366f1);
+      border: none;
+      color: #020617;
+      padding: 0.75rem 1.4rem;
+      border-radius: 999px;
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      font-family: inherit;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.35);
+    }
+
+    .stat-card {
+      display: grid;
+      gap: 0.75rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      font-size: 0.85rem;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      padding-bottom: 0.4rem;
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 0.9rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .list-section {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+    }
+
+    .list-section ul {
+      list-style: none;
+      margin: 0.75rem 0 0;
+      padding: 0;
+      display: grid;
+      gap: 0.65rem;
+      font-size: 0.8rem;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .list-section li {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .list-section li span {
+      color: rgba(148, 163, 184, 0.85);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120%);
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: #e0f2fe;
+      padding: 0.75rem 1.5rem;
+      border-radius: 999px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: transform 0.25s ease;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .toast.visible {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.error {
+      border-color: rgba(248, 113, 113, 0.5);
+      color: #fca5a5;
+    }
+
+    .toast.success {
+      border-color: rgba(110, 231, 183, 0.5);
+      color: #bbf7d0;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) auto;
+        height: calc(100% - 74px);
+      }
+
+      .control-panel {
+        height: auto;
+        border-left: none;
+        border-top: 1px solid rgba(148, 163, 184, 0.25);
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="title-banner">🌍 Choose a Country to Infect</div>
-  <div id="map"></div>
+  <div class="banner">World Deployment Map – Select a country to deploy your armed malware</div>
+  <div class="layout">
+    <div id="map"></div>
+    <aside class="control-panel">
+      <div class="panel-header">
+        <h2>Deployment Console</h2>
+        <button id="logoutBtn" class="ghost-btn">Logout</button>
+      </div>
+      <div class="panel-section">
+        <div class="label">Operator</div>
+        <strong id="operatorName">—</strong>
+      </div>
+      <div class="panel-section">
+        <div class="label">Armed Blueprint</div>
+        <strong id="currentBlueprint">None</strong>
+      </div>
+      <div class="panel-section">
+        <div class="label">Malware Quality</div>
+        <strong id="currentQuality">0.50</strong>
+      </div>
+      <div class="panel-section">
+        <div class="label">Attributes</div>
+        <strong id="currentAttributes">0.50 / 0.50 / 0.50</strong>
+      </div>
+      <div class="panel-buttons">
+        <button id="refreshState" class="primary-btn">Sync State</button>
+        <button id="openProduction" class="ghost-btn">Production</button>
+      </div>
+      <div class="stat-card">
+        <div class="stat-row"><span>Active Infections</span><strong id="activeCount">0</strong></div>
+        <div class="stat-row"><span>Pending Exposures</span><strong id="exposureCount">0</strong></div>
+        <div class="stat-row"><span>Total Infected</span><strong id="totalInfected">0</strong></div>
+      </div>
+      <section class="list-section">
+        <h3>Active Infections</h3>
+        <ul id="infectionList"></ul>
+      </section>
+      <section class="list-section">
+        <h3>Exposure Radar</h3>
+        <ul id="exposureList"></ul>
+      </section>
+      <section class="list-section">
+        <h3>Latest Events</h3>
+        <ul id="eventList"></ul>
+      </section>
+    </aside>
+  </div>
+  <div id="toast" class="toast"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
+  <script src="assets/client-api.js"></script>
   <script>
-    const map = L.map('map', {
-    center: [20, 0],
-    zoom: 2,
-    minZoom: 2,
-    maxZoom: 6,
-    maxBounds: [
-        [-85, -180], // near South Pole
-        [85, 180]    // near North Pole
-    ],
-    maxBoundsViscosity: 1.0,
-    worldCopyJump: false
-    });
+    (function () {
+      let map;
+      let geojsonLayer;
+      const infectedCountries = new Map();
+      const exposureMap = new Map();
+      let currentConfig = null;
+      let operatorName = null;
+      const toast = document.getElementById('toast');
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
-    subdomains: 'abcd',
-    noWrap: true               // 🔥 THIS IS THE KEY LINE
-    }).addTo(map);
-
-
-    const infectedCountries = new Set();
-
-    function style(feature) {
-      const countryName = feature.properties.ADMIN || feature.properties.name;
-      return {
-        fillColor: infectedCountries.has(countryName) ? '#ff0055' : '#ffffff22',
-        weight: 1,
-        opacity: 1,
-        color: '#ffffff44',
-        fillOpacity: 0.6
+      const elements = {
+        blueprint: document.getElementById('currentBlueprint'),
+        quality: document.getElementById('currentQuality'),
+        attributes: document.getElementById('currentAttributes'),
+        infectionList: document.getElementById('infectionList'),
+        exposureList: document.getElementById('exposureList'),
+        eventList: document.getElementById('eventList'),
+        activeCount: document.getElementById('activeCount'),
+        exposureCount: document.getElementById('exposureCount'),
+        totalInfected: document.getElementById('totalInfected'),
+        operator: document.getElementById('operatorName')
       };
-    }
 
-    function onEachFeature(feature, layer) {
-      const countryName = feature.properties.ADMIN || feature.properties.name;
-      layer.on({
-        mouseover: function () {
-          layer.setStyle({ color: '#00ffff', weight: 2, fillOpacity: 0.75 });
-        },
-        mouseout: function () {
-          geojson.resetStyle(layer);
-        },
-        click: function () {
-          if (!countryName) return;
-          if (!infectedCountries.has(countryName)) {
-            infectedCountries.add(countryName);
-            alert(`🦠 Infection started in ${countryName}`);
-          } else {
-            infectedCountries.delete(countryName);
-            alert(`🧼 Infection removed from ${countryName}`);
-          }
-          geojson.setStyle(style);
+      document.getElementById('refreshState').addEventListener('click', loadState);
+      document.getElementById('openProduction').addEventListener('click', () => {
+        window.location.href = '/production';
+      });
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await API.logout();
+        window.location.href = '/auth.html';
+      });
+
+      function showToast(message, isError = false) {
+        if (!message) {
+          toast.classList.remove('visible', 'error', 'success');
+          return;
         }
-      });
-    }
+        toast.textContent = message;
+        toast.classList.remove('error', 'success');
+        toast.classList.add(isError ? 'error' : 'success');
+        toast.classList.add('visible');
+        setTimeout(() => {
+          toast.classList.remove('visible');
+        }, 2600);
+      }
 
-    let geojson;
+      function initMap() {
+        map = L.map('map', {
+          center: [20, 0],
+          zoom: 2,
+          minZoom: 2,
+          maxZoom: 6,
+          maxBounds: [
+            [-85, -180],
+            [85, 180]
+          ],
+          maxBoundsViscosity: 1.0,
+          worldCopyJump: false
+        });
 
-    axios.get('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
-      .then(response => {
-        geojson = L.geoJson(response.data, {
-          style: style,
-          onEachFeature: onEachFeature
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+          subdomains: 'abcd',
+          noWrap: true
         }).addTo(map);
+      }
+
+      function getCountryColor(name) {
+        if (infectedCountries.has(name)) {
+          const intensity = Math.max(0, Math.min(1, infectedCountries.get(name).intensity || 0));
+          const r = Math.floor(200 + intensity * 55);
+          const g = Math.floor(30 + (1 - intensity) * 70);
+          return `rgba(${r}, ${g}, 90, 0.8)`;
+        }
+        if (exposureMap.has(name)) {
+          const progress = Math.max(0, Math.min(1, exposureMap.get(name).progress || 0));
+          const alpha = 0.2 + progress * 0.5;
+          return `rgba(56, 189, 248, ${alpha})`;
+        }
+        return 'rgba(148, 163, 184, 0.22)';
+      }
+
+      function styleFeature(feature) {
+        const countryName = feature.properties.ADMIN || feature.properties.name;
+        return {
+          fillColor: getCountryColor(countryName),
+          weight: 1,
+          opacity: 1,
+          color: '#1e293b',
+          fillOpacity: infectedCountries.has(countryName) ? 0.85 : 0.6
+        };
+      }
+
+      function onEachFeature(feature, layer) {
+        const countryName = feature.properties.ADMIN || feature.properties.name;
+        layer.on({
+          mouseover: function () {
+            layer.setStyle({ color: '#38bdf8', weight: 2 });
+          },
+          mouseout: function () {
+            geojsonLayer.resetStyle(layer);
+          },
+          click: function () {
+            if (!countryName) {
+              return;
+            }
+            deployToCountry(countryName);
+          }
+        });
+        layer.bindTooltip(countryName, { sticky: true });
+      }
+
+      async function loadGeoJson() {
+        const response = await fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json');
+        const data = await response.json();
+        geojsonLayer = L.geoJson(data, {
+          style: styleFeature,
+          onEachFeature
+        }).addTo(map);
+      }
+
+      function updateLists(snapshot) {
+        elements.infectionList.innerHTML = '';
+        elements.exposureList.innerHTML = '';
+        elements.eventList.innerHTML = '';
+
+        const infections = snapshot?.infectedCountries || [];
+        const exposures = snapshot?.pendingExposures || [];
+        const events = snapshot?.events || [];
+
+        infections.forEach((entry) => {
+          const li = document.createElement('li');
+          const name = document.createElement('strong');
+          name.textContent = entry.country;
+          const info = document.createElement('span');
+          info.textContent = `Intensity ${Number(entry.intensity || 0).toFixed(2)}`;
+          li.appendChild(name);
+          li.appendChild(info);
+          elements.infectionList.appendChild(li);
+        });
+
+        exposures.forEach((entry) => {
+          const li = document.createElement('li');
+          const name = document.createElement('strong');
+          name.textContent = entry.country;
+          const info = document.createElement('span');
+          info.textContent = `Progress ${(entry.progress * 100).toFixed(1)}%`;
+          li.appendChild(name);
+          li.appendChild(info);
+          elements.exposureList.appendChild(li);
+        });
+
+        events.slice().reverse().forEach((event) => {
+          const li = document.createElement('li');
+          const type = document.createElement('strong');
+          type.textContent = event.type;
+          const time = document.createElement('span');
+          time.textContent = new Date(event.timestamp).toLocaleTimeString();
+          li.appendChild(type);
+          li.appendChild(time);
+          elements.eventList.appendChild(li);
+        });
+      }
+
+      function applySnapshot(snapshot, config) {
+        if (config) {
+          currentConfig = config;
+          elements.blueprint.textContent = config.selectedBlueprint || 'None';
+          elements.quality.textContent = Number(config.malwareQuality || 0.5).toFixed(2);
+          elements.attributes.textContent = [
+            Number(config.attributes?.spread || 0.5).toFixed(2),
+            Number(config.attributes?.stealth || 0.5).toFixed(2),
+            Number(config.attributes?.resilience || 0.5).toFixed(2)
+          ].join(' / ');
+        }
+
+        infectedCountries.clear();
+        exposureMap.clear();
+
+        (snapshot?.infectedCountries || []).forEach((entry) => {
+          infectedCountries.set(entry.country, entry);
+        });
+
+        (snapshot?.pendingExposures || []).forEach((entry) => {
+          exposureMap.set(entry.country, entry);
+        });
+
+        elements.activeCount.textContent = snapshot?.activeInfections ?? infectedCountries.size;
+        elements.exposureCount.textContent = snapshot?.pendingExposures?.length ?? exposureMap.size;
+        elements.totalInfected.textContent = snapshot?.totalInfected ?? infectedCountries.size;
+
+        updateLists(snapshot);
+
+        if (geojsonLayer) {
+          geojsonLayer.setStyle(styleFeature);
+        }
+      }
+
+      async function loadState() {
+        try {
+          const response = await API.request('/api/world/state', { skipRedirect: true });
+          applySnapshot(response?.snapshot, response?.config);
+        } catch (err) {
+          console.error('Failed to load world state:', err);
+          showToast('Unable to sync state', true);
+        }
+      }
+
+      async function deployToCountry(countryName) {
+        if (!currentConfig || !currentConfig.selectedBlueprint) {
+          showToast('Arm a blueprint in Production before deploying.', true);
+          return;
+        }
+        const alreadyInfected = infectedCountries.has(countryName);
+        try {
+          const response = await API.request('/api/world/infect', {
+            method: 'POST',
+            body: { country: countryName, reapply: alreadyInfected },
+            skipRedirect: true
+          });
+          applySnapshot(response?.snapshot, response?.config);
+          const message = alreadyInfected
+            ? `${countryName}: intensity boosted`
+            : `${countryName}: infection deployed`;
+          showToast(message, false);
+        } catch (err) {
+          const text = (err?.data?.error) || err.message || 'Deployment failed';
+          showToast(text, true);
+        }
+      }
+
+      async function init() {
+        try {
+          const session = await API.ensureAuthenticated();
+          if (session?.user) {
+            operatorName = session.user.username;
+            elements.operator.textContent = operatorName;
+          }
+          if (session?.config) {
+            currentConfig = session.config;
+            applySnapshot(null, session.config);
+          }
+          await loadState();
+        } catch (err) {
+          console.error('Failed to authenticate on map page:', err);
+        }
+      }
+
+      initMap();
+      loadGeoJson().then(() => {
+        init();
       });
+    })();
   </script>
 </body>
 </html>
