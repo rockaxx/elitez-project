@@ -244,9 +244,167 @@
       background: rgba(56, 189, 248, 0.35);
       transform: translateY(-2px);
     }
-  </style>
+      .home-btn {
+      position: fixed;
+      top: 18px;
+      left: 18px;
+      z-index: 10;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.8);
+      color: #e0f2fe;
+      padding: 0.45rem 1.1rem;
+      border-radius: 999px;
+      font-family: inherit;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s ease, border 0.2s ease, transform 0.2s ease;
+    }
+
+    .home-btn:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: rgba(56, 189, 248, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .progress-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1.2rem;
+      padding: 1rem 1.2rem;
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-summary .label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(148, 163, 184, 0.8);
+      margin-bottom: 0.3rem;
+    }
+
+    .progress-summary strong {
+      font-size: 1.2rem;
+      color: #f8fafc;
+    }
+
+    .company-grid {
+      margin-top: 2rem;
+      display: grid;
+      gap: 1.2rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .company-card {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 18px;
+      padding: 1.2rem 1.3rem;
+      display: grid;
+      gap: 0.75rem;
+      box-shadow: 0 10px 28px rgba(2, 6, 23, 0.35);
+    }
+
+    .company-card h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #38bdf8;
+    }
+
+    .company-card p {
+      margin: 0;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: rgba(224, 242, 254, 0.85);
+    }
+
+    .company-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.82rem;
+      color: rgba(148, 163, 184, 0.9);
+    }
+
+    .company-card button {
+      border: 1px solid rgba(56, 189, 248, 0.55);
+      background: rgba(56, 189, 248, 0.18);
+      color: #e0f2fe;
+      padding: 0.55rem 1.1rem;
+      border-radius: 999px;
+      font-family: inherit;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .company-card button:hover:not([disabled]) {
+      background: rgba(56, 189, 248, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .company-card button[disabled] {
+      cursor: default;
+      opacity: 0.6;
+    }
+
+    .owned-badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(74, 222, 128, 0.4);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #bbf7d0;
+    }
+
+    .employee-list {
+      display: grid;
+      gap: 0.5rem;
+      padding-top: 0.5rem;
+    }
+
+    .employee-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.7rem;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.8rem;
+      color: rgba(224, 242, 254, 0.85);
+    }
+
+    .employee-item button {
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      background: rgba(56, 189, 248, 0.15);
+      color: #e0f2fe;
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .employee-item button[disabled] {
+      opacity: 0.6;
+      cursor: default;
+    }</style>
 </head>
 <body>
+  <button id="homeButton" class="home-btn">Home</button>
   <div id="tsparticles"></div>
   <div class="container">
     <nav class="sidebar">
@@ -259,6 +417,11 @@
     </nav>
 
     <section class="settings-panel">
+      <div class="progress-summary" id="progressSummary">
+        <div><span class="label">Level</span><strong id="summaryLevel">1</strong></div>
+        <div><span class="label">Skill Points</span><strong id="summarySkillPoints">0</strong></div>
+        <div><span class="label">Capital</span><strong id="summaryCapital">0</strong></div>
+      </div>
       <h1>SHOP SUBS</h1>
       <div class="subscription-grid">
         <article class="tier-card">
@@ -292,23 +455,197 @@
           <button type="button">Choose High</button>
         </article>
       </div>
+      <h2>Black Market Firms</h2>
+      <div class="company-grid" id="companyGrid"></div>
     </section>
 
   </div>
 
+  
+  <script src="assets/client-api.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      tsParticles.load('tsparticles', {
-        particles: { number:{ value:80, density:{ enable:true, area:800 }}, color:{ value:['#0ff','#0f0','#f0f'] }, shape:{ type:'circle' }, opacity:{ value:0.25 }, size:{ value:{ min:1, max:4 } }, move:{ enable:true, speed:1.2, outModes:'out' }, links:{ enable:true, distance:140, color:'#0ff', opacity:0.2, width:1 } },
-        interactivity:{ events:{ onhover:{ enable:true, mode:'grab' }, onclick:{ enable:true, mode:'push' } }, modes:{ grab:{ distance:180, links:{ opacity:0.5 } }, push:{ quantity:3 } } }
+    document.addEventListener("DOMContentLoaded", () => {
+      tsParticles.load("tsparticles", {
+        particles: { number:{ value:80, density:{ enable:true, area:800 }}, color:{ value:["#0ff","#0f0","#f0f"] }, shape:{ type:"circle" }, opacity:{ value:0.25 }, size:{ value:{ min:1, max:4 } }, move:{ enable:true, speed:1.2, outModes:"out" }, links:{ enable:true, distance:140, color:"#0ff", opacity:0.2, width:1 } },
+        interactivity:{ events:{ onhover:{ enable:true, mode:"grab" }, onclick:{ enable:true, mode:"push" } }, modes:{ grab:{ distance:180, links:{ opacity:0.5 } }, push:{ quantity:3 } } }
       });
 
-      const tabs = document.querySelectorAll('nav.sidebar li');
-      tabs.forEach(tab => tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
+      const tabs = document.querySelectorAll("nav.sidebar li");
+      tabs.forEach(tab => tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
       }));
+
+      const homeButton = document.getElementById("homeButton");
+      if (homeButton) {
+        homeButton.addEventListener("click", () => {
+          window.location.href = "/";
+        });
+      }
+
+      const summaryLevel = document.getElementById("summaryLevel");
+      const summarySkillPoints = document.getElementById("summarySkillPoints");
+      const summaryCapital = document.getElementById("summaryCapital");
+      const companyGrid = document.getElementById("companyGrid");
+
+      let progressionState = null;
+      let companyCatalog = [];
+
+      function updateSummary(prog) {
+        if (!prog) {
+          summaryLevel.textContent = "--";
+          summarySkillPoints.textContent = "0";
+          summaryCapital.textContent = "0";
+          return;
+        }
+        summaryLevel.textContent = prog.level || 1;
+        summarySkillPoints.textContent = prog.skillPoints || 0;
+        summaryCapital.textContent = prog.capital || 0;
+      }
+
+      function describeBonuses(bonuses) {
+        if (!bonuses) {
+          return "";
+        }
+        return Object.entries(bonuses)
+          .map(([key, value]) => {
+            const percent = Math.round((value || 0) * 100);
+            const sign = percent >= 0 ? "+" : "";
+            return `${key.toUpperCase()} ${sign}${percent}%`;
+          })
+          .join(", ");
+      }
+
+      async function purchaseCompany(companyId) {
+        try {
+          const response = await API.purchaseCompany(companyId);
+          progressionState = response?.progression || progressionState;
+          updateSummary(progressionState);
+          renderCompanies();
+        } catch (err) {
+          const message = (err?.data?.error) || err.message || "Purchase failed";
+          alert(message);
+        }
+      }
+
+      async function hireEmployee(companyId, employeeId) {
+        try {
+          const response = await API.hireEmployee(companyId, employeeId);
+          progressionState = response?.progression || progressionState;
+          updateSummary(progressionState);
+          renderCompanies();
+        } catch (err) {
+          const message = (err?.data?.error) || err.message || "Hire failed";
+          alert(message);
+        }
+      }
+
+      function renderCompanies() {
+        if (!companyGrid) {
+          return;
+        }
+        companyGrid.innerHTML = "";
+        const ownedCompanies = new Set((progressionState?.companies || []).map((c) => c.id));
+        const hiredEmployees = new Set((progressionState?.employees || []).map((e) => e.id));
+
+        companyCatalog.forEach((company) => {
+          const card = document.createElement("article");
+          card.className = "company-card";
+
+          const title = document.createElement("h3");
+          title.textContent = company.name;
+          card.appendChild(title);
+
+          const description = document.createElement("p");
+          description.textContent = company.description;
+          card.appendChild(description);
+
+          const meta = document.createElement("div");
+          meta.className = "company-meta";
+          meta.innerHTML = `<span>Cost: ${company.cost} capital</span><span>Upkeep: ${company.upkeep}/day</span>`;
+          card.appendChild(meta);
+
+          if (company.bonuses) {
+            const bonuses = document.createElement("p");
+            bonuses.className = "company-bonuses";
+            bonuses.textContent = `Bonuses: ${describeBonuses(company.bonuses)}`;
+            card.appendChild(bonuses);
+          }
+
+          const owned = ownedCompanies.has(company.id);
+          if (owned) {
+            const badge = document.createElement("span");
+            badge.className = "owned-badge";
+            badge.textContent = "Owned";
+            card.appendChild(badge);
+          }
+
+          const actionButton = document.createElement("button");
+          actionButton.textContent = owned ? "Owned" : `Purchase (${company.cost})`;
+          actionButton.disabled = owned;
+          if (!owned) {
+            actionButton.addEventListener("click", () => purchaseCompany(company.id));
+          }
+          card.appendChild(actionButton);
+
+          if (company.employees && company.employees.length) {
+            const employeeList = document.createElement("div");
+            employeeList.className = "employee-list";
+
+            company.employees.forEach((employee) => {
+              const item = document.createElement("div");
+              item.className = "employee-item";
+
+              const info = document.createElement("div");
+              const bonuses = describeBonuses(employee.bonuses);
+              info.innerHTML = `<strong>${employee.name}</strong><br><span>Cost: ${employee.cost} - ${bonuses}</span>`;
+              item.appendChild(info);
+
+              const hireButton = document.createElement("button");
+              const hired = hiredEmployees.has(employee.id);
+              hireButton.textContent = hired ? "Hired" : "Hire";
+              hireButton.disabled = hired || !owned;
+              if (!hireButton.disabled) {
+                hireButton.addEventListener("click", () => hireEmployee(company.id, employee.id));
+              }
+              item.appendChild(hireButton);
+
+              employeeList.appendChild(item);
+            });
+
+            card.appendChild(employeeList);
+          }
+
+          companyGrid.appendChild(card);
+        });
+      }
+
+      async function hydrate() {
+        try {
+          await API.ensureAuthenticated();
+          const data = await API.fetchProgression();
+          progressionState = data?.progression || null;
+          companyCatalog = data?.companies || [];
+          updateSummary(progressionState);
+          renderCompanies();
+        } catch (err) {
+          console.error("Unable to load progression for shop:", err);
+          updateSummary(null);
+        }
+      }
+
+      hydrate();
     });
-  </script>
-</body>
+  </script>\r\n</body>
 </html>
+
+
+
+
+
+
+
+
+
+
+

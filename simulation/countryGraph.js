@@ -1,4 +1,6 @@
-module.exports = {
+const { COUNTRY_AV_OVERRIDES } = require('./progressionData');
+
+const graph = {
   "United States": {
     code: "US",
     region: "North America",
@@ -136,3 +138,17 @@ module.exports = {
     population: 0.4
   }
 };
+
+for (const [country, profile] of Object.entries(COUNTRY_AV_OVERRIDES)) {
+  if (!graph[country]) {
+    continue;
+  }
+  graph[country].antivirus = {
+    vendor: profile.vendor,
+    tier: profile.tier,
+    difficulty: profile.difficulty,
+    rewardXp: profile.rewardXp
+  };
+}
+
+module.exports = graph;

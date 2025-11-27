@@ -251,12 +251,34 @@
 </head>
 <body>
   <header>
-    <div class="title">Production Command</div>
+    <div class="title-wrap">
+      <div class="title">Production Command</div>
+      <button id="homeButton" class="home-button">Home</button>
+    </div>
     <div class="user-box">
-      <span>Logged in as <strong id="agentName">—</strong></span>
+      <span>Logged in as <strong id="agentName">-</strong></span>
       <button id="logoutBtn" class="logout-button">Logout</button>
     </div>
   </header>
+  <div class="progress-hud" id="progressHud">
+    <div class="progress-stat">
+      <span class="label">Level</span>
+      <strong id="hudLevel">1</strong>
+    </div>
+    <div class="progress-meter">
+      <div class="label">XP</div>
+      <div class="bar"><span id="hudXpFill"></span></div>
+      <small id="hudXpLabel">0 / 120</small>
+    </div>
+    <div class="progress-stat">
+      <span class="label">Skill Points</span>
+      <strong id="hudSkillPoints">0</strong>
+    </div>
+    <div class="progress-stat">
+      <span class="label">Capital</span>
+      <strong id="hudCapital">0</strong>
+    </div>
+  </div>
 
   <main>
     <section class="card">
@@ -311,7 +333,7 @@
   </section>
 
   <script src="assets/client-api.js"></script>
-  <script>
+  <script src="assets/client-api.js"></script>\r\n  <script>
     (function () {
       const blueprintSelect = document.getElementById('blueprintSelect');
       const qualityRange = document.getElementById('malwareQuality');
@@ -329,10 +351,22 @@
       const deploymentList = document.getElementById('deploymentList');
       const noDeployments = document.getElementById('noDeployments');
       const agentName = document.getElementById('agentName');
+      const homeButton = document.getElementById('homeButton');
+      const hudLevel = document.getElementById('hudLevel');
+      const hudXpFill = document.getElementById('hudXpFill');
+      const hudXpLabel = document.getElementById('hudXpLabel');
+      const hudSkillPoints = document.getElementById('hudSkillPoints');
+      const hudCapital = document.getElementById('hudCapital');
+      const progressHud = document.getElementById('progressHud');
+      progressHud.style.display = 'none';
+
+      homeButton.addEventListener('click', () => {
+        window.location.href = '/';
+      });
 
       document.getElementById('saveConfig').addEventListener('click', saveLoadout);
       document.getElementById('openMap').addEventListener('click', () => {
-        window.location.href = '/map';
+        window.location.href = '/map.html';
       });
       document.getElementById('refreshConfig').addEventListener('click', () => {
         refreshProfile();
@@ -353,6 +387,34 @@
         stealthLabel.textContent = Number(stealthRange.value).toFixed(2);
         resilienceLabel.textContent = Number(resilienceRange.value).toFixed(2);
       }
+
+      function updateProgressionHud(progression) {
+        if (!progression) {
+          progressHud.style.display = 'none';
+          return;
+        }
+        progressHud.style.display = '';
+        const level = progression.level || 1;
+        const xp = progression.xp || 0;
+        const xpToNext = progression.xpToNext || 1;
+        const ratio = Math.max(0, Math.min(1, xpToNext ? xp / xpToNext : 0));
+        hudLevel.textContent = level;
+        hudXpFill.style.transform = `scaleX(${ratio})`;
+        hudXpLabel.textContent = `${xp} / ${xpToNext}`;
+        hudSkillPoints.textContent = progression.skillPoints || 0;
+        hudCapital.textContent = progression.capital || 0;
+      }
+
+      async function refreshProgression() {
+        try {
+          const data = await API.fetchProgression();
+          updateProgressionHud(data?.progression);
+        } catch (err) {
+          console.warn('Unable to fetch progression:', err);
+          updateProgressionHud(null);
+        }
+      }
+
 
       async function init() {
         try {
@@ -470,3 +532,12 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+

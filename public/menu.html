@@ -2,24 +2,144 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Elite Z - Menu</title>
+  <title>Elite Z - Command Hub</title>
   <link rel="stylesheet" href="menu.css">
+  <style>
+    .progress-card {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      box-shadow: 0 18px 40px rgba(2, 6, 23, 0.45);
+      display: grid;
+      gap: 0.9rem;
+      text-align: left;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .progress-card.hidden {
+      display: none;
+    }
+
+    .progress-title {
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(148, 163, 184, 0.85);
+    }
+
+    .progress-level {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.18);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #38bdf8, #6366f1);
+      transform-origin: left;
+      scale: 0 1;
+    }
+
+    .progress-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.9rem;
+      color: rgba(226, 232, 240, 0.9);
+    }
+
+    .nav-links {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .menu-button.secondary-link {
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: #cbd5f5;
+    }
+
+    .menu-button.secondary-link:hover {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: rgba(56, 189, 248, 0.45);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h1 class="title">ELITE Z</h1>
-    <button class="menu-button" onclick="openProduction()">Production</button>
-    <button class="menu-button" onclick="openMap()">World Map</button>
-    <button class="menu-button" onclick="openShop()">Subscription</button>
-    <button class="menu-button" onclick="openSettings()">Settings</button>
+    <div class="nav-links">
+      <button class="menu-button" onclick="openProduction()">Production</button>
+      <button class="menu-button" onclick="openMap()">World Map</button>
+      <button class="menu-button" onclick="openBlueprint()">Blueprint Lab</button>
+      <button class="menu-button" onclick="openSandbox()">Sandbox VM</button>
+      <button class="menu-button secondary-link" onclick="openShop()">Subscription & Firms</button>
+      <button class="menu-button secondary-link" onclick="openSettings()">Settings</button>
+    </div>
+
     <div class="auth-status">
       <span id="authStatus">Checking credentials...</span>
       <button id="authAction" class="menu-button secondary">Login</button>
+    </div>
+
+    <div id="progressCard" class="progress-card hidden">
+      <div class="progress-title">Operator Progression</div>
+      <div class="progress-level" id="progressLevel">Level 1</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div id="progressXp" class="progress-title">0 / 120 XP</div>
+      <div class="progress-meta">
+        <span>Skill Points: <strong id="progressSkillPoints">0</strong></span>
+        <span>Capital: <strong id="progressCapital">0</strong></span>
+      </div>
     </div>
   </div>
 
   <script src="assets/client-api.js"></script>
   <script>
+    const progressCard = document.getElementById('progressCard');
+    const progressLevel = document.getElementById('progressLevel');
+    const progressFill = document.getElementById('progressFill');
+    const progressXp = document.getElementById('progressXp');
+    const progressSkillPoints = document.getElementById('progressSkillPoints');
+    const progressCapital = document.getElementById('progressCapital');
+
+    function updateProgressCard(data) {
+      if (!data || !data.progression) {
+        progressCard.classList.add('hidden');
+        return;
+      }
+      const { progression } = data;
+      progressCard.classList.remove('hidden');
+      progressLevel.textContent = `Level ${progression.level || 1}`;
+      const xp = progression.xp || 0;
+      const xpToNext = progression.xpToNext || 1;
+      const ratio = Math.max(0, Math.min(1, xpToNext ? xp / xpToNext : 0));
+      progressFill.style.transform = 'scaleX(' + ratio + ')';
+      progressXp.textContent = `${xp} / ${xpToNext} XP`;
+      progressSkillPoints.textContent = progression.skillPoints || 0;
+      progressCapital.textContent = progression.capital || 0;
+    }
+
     async function ensureAuthSession() {
       const status = document.getElementById('authStatus');
       const action = document.getElementById('authAction');
@@ -28,6 +148,7 @@
         status.textContent = 'Not authenticated';
         action.textContent = 'Login / Register';
         action.dataset.mode = 'login';
+        progressCard.classList.add('hidden');
         return;
       }
       try {
@@ -36,6 +157,8 @@
           status.textContent = `Welcome, ${session.user.username}`;
           action.textContent = 'Logout';
           action.dataset.mode = 'logout';
+          const progression = await API.fetchProgression().catch(() => null);
+          updateProgressCard(progression);
           return;
         }
       } catch (err) {
@@ -45,6 +168,7 @@
       status.textContent = 'Session expired';
       action.textContent = 'Login / Register';
       action.dataset.mode = 'login';
+      progressCard.classList.add('hidden');
     }
 
     function requireAuth(destination) {
@@ -57,19 +181,27 @@
     }
 
     function openProduction() {
-      requireAuth('/production');
+      requireAuth('/production.html');
     }
 
     function openMap() {
-      requireAuth('/map');
+      requireAuth('/map.html');
+    }
+
+    function openBlueprint() {
+      requireAuth('/blueprint.html');
+    }
+
+    function openSandbox() {
+      requireAuth('/sandbox/vm.html');
     }
 
     function openShop() {
-      window.location.href = '/subscription';
+      requireAuth('/shop.html');
     }
 
     function openSettings() {
-      window.location.href = '/settings';
+      window.location.href = '/settings/settings.html';
     }
 
     document.getElementById('authAction').addEventListener('click', async () => {
@@ -86,3 +218,7 @@
   </script>
 </body>
 </html>
+
+
+
+

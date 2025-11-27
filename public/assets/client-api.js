@@ -115,12 +115,50 @@
     }
   }
 
+  function withPost(body = {}) {
+    return {
+      method: 'POST',
+      body,
+      skipRedirect: true
+    };
+  }
+
+  async function fetchProgression() {
+    return request('/api/progression', { skipRedirect: true });
+  }
+
+  async function unlockSkill(skillId) {
+    return request('/api/progression/skills', withPost({ skillId }));
+  }
+
+  async function purchaseCompany(companyId) {
+    return request('/api/progression/companies', withPost({ companyId }));
+  }
+
+  async function hireEmployee(companyId, employeeId) {
+    return request('/api/progression/employees', withPost({ companyId, employeeId }));
+  }
+
+  async function awardBlueprintXp(blueprintType, complexity) {
+    return request('/api/progression/blueprint-build', withPost({ blueprintType, complexity }));
+  }
+
+  async function submitAvBypass(challengeId, answer) {
+    return request('/api/world/av-bypass', withPost({ challengeId, answer }));
+  }
+
   window.API = {
     request,
     ensureAuthenticated,
     getToken,
     setToken,
     clearToken,
-    logout
+    logout,
+    fetchProgression,
+    unlockSkill,
+    purchaseCompany,
+    hireEmployee,
+    awardBlueprintXp,
+    submitAvBypass
   };
 })();

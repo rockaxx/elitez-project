@@ -9,8 +9,30 @@
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <link rel="stylesheet" href="./sandbox/vm.css" />
+  <style>
+    .home-button {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1000;
+      background: rgba(35, 45, 70, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: #e0f2fe;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-family: inherit;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .home-button:hover {
+      background: rgba(56, 189, 248, 0.2);
+      transform: translateY(-1px);
+    }
+  </style>
 </head>
 <body>
+  <button class="home-button" onclick="window.location.href='/'">Home</button>
   <div class="desktop">
     <div class="icon" style="top: 42px; left: 32px;" onclick="openExplorer()">
       <img src="https://icons.iconarchive.com/icons/icojam/blue-bits/256/folder-icon.png">

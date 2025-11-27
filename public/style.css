@@ -1,9 +1,77 @@
-body {
-  background-color: #0f0f0f;
-  color: #0f0;
-  font-family: 'Courier New', monospace;
+:root {
+  --bg-primary: #030712;
+  --panel-bg: rgba(9, 14, 24, 0.86);
+  --panel-border: rgba(56, 189, 248, 0.35);
+  --text-primary: #e0f2fe;
+  --accent-cyan: #22d3ee;
+  --accent-magenta: #f472b6;
+  --accent-purple: #a855f7;
+  --shadow-glow: 0 0 24px rgba(56, 189, 248, 0.35);
 }
 
-#editor {
-  background-color: #111;
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Orbitron', sans-serif;
 }
+
+a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-magenta);
+}
+
+button {
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 0.1em;
+}
+
+.glass-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.35);
+  backdrop-filter: blur(10px);
+  padding: 1.2rem;
+}
+
+.glow-text {
+  text-shadow: 0 0 12px rgba(148, 163, 184, 0.35);
+}
+\n.neon-btn {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  color: #020817;
+  border: none;
+  padding: 0.65rem 1.6rem;
+  border-radius: 999px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-glow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.neon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 28px rgba(244, 114, 182, 0.45);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--accent-cyan), var(--accent-purple));
+  border-radius: 999px;
+}
+

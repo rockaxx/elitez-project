@@ -46,6 +46,26 @@ db.serialize(() => {
   `);
 
   db.run(`
+    CREATE TABLE IF NOT EXISTS player_progression (
+      user_id INTEGER PRIMARY KEY,
+      level INTEGER DEFAULT 1,
+      xp INTEGER DEFAULT 0,
+      skill_points INTEGER DEFAULT 0,
+      capital INTEGER DEFAULT 0,
+      unlocked_blueprints TEXT DEFAULT '[]',
+      skills_unlocked TEXT DEFAULT '[]',
+      flags TEXT DEFAULT '[]',
+      companies TEXT DEFAULT '[]',
+      employees TEXT DEFAULT '[]',
+      av_bypasses TEXT DEFAULT '{}',
+      last_random_xp_at TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  db.run(`
     CREATE TABLE IF NOT EXISTS deployments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,

@@ -46,6 +46,9 @@ class SimulationManager {
       this.sessions.set(id, session);
     } else {
       session.updateConfig(config);
+      if (config.progression) {
+        session.applyProgression(config.progression, { silent: true });
+      }
     }
     this.ensureTicker();
     return session;

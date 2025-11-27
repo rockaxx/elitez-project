@@ -106,24 +106,22 @@
 
   <!-- Top status bar -->
   <div class="status-bar">
-    <div class="status-item"><i class="fas fa-microchip"></i> CPU: <span id="stat-cpu">—</span></div>
-    <div class="status-item"><i class="fas fa-wifi"></i> Net: <span id="stat-net">—</span></div>
-    <div class="status-item"><i class="fas fa-user-secret"></i> Rep: <span id="stat-rep">—</span></div>
+    <div class="status-item"><i class="fas fa-microchip"></i> CPU: <span id="stat-cpu">--</span></div>
+    <div class="status-item"><i class="fas fa-wifi"></i> Net: <span id="stat-net">--</span></div>
+    <div class="status-item"><i class="fas fa-user-secret"></i> Rep: <span id="stat-rep">--</span></div>
   </div>
 
   <div class="container">
     <nav class="menu" role="menu" aria-label="Main Navigation">
       <div class="selector"></div>
       <ul>
-        <li data-index="0" tabindex="0"><i class="fas fa-code-branch"></i> Build Malware</li>
-        <li data-index="1" tabindex="0"><i class="fas fa-globe"></i> World Map</li>
-        <li data-index="2" tabindex="0"><i class="fas fa-satellite-dish"></i> Hacker Network</li>
-        <li data-index="3" tabindex="0"><i class="fas fa-folder-open"></i> Mission Log</li>
-        <li data-index="4" tabindex="0"><i class="fas fa-desktop"></i> Virtual Machine</li>
-        <!-- Only one extra: Settings -->
-
-        <li data-index="5" tabindex="0"><i class="fas fa-cog"></i> Settings</li>
-        <li data-index="6" tabindex="0"><i class="fas fa-cog"></i> Subscription</li>
+        <li data-index="0" tabindex="0"><i class="fas fa-industry"></i> Production Command</li>
+        <li data-index="1" tabindex="0"><i class="fas fa-code-branch"></i> Blueprint Lab</li>
+        <li data-index="2" tabindex="0"><i class="fas fa-globe"></i> World Map</li>
+        <li data-index="3" tabindex="0"><i class="fas fa-building"></i> Black Market</li>
+        <li data-index="4" tabindex="0"><i class="fas fa-desktop"></i> Sandbox VM</li>
+        <li data-index="5" tabindex="0"><i class="fas fa-cog"></i> Settings Vault</li>
+        <li data-index="6" tabindex="0"><i class="fas fa-user-shield"></i> Auth Portal</li>
       </ul>
     </nav>
 
@@ -134,8 +132,10 @@
     </section>
   </div>
 
+  <script src="assets/client-api.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      API.ensureAuthenticated().catch(() => {});
       // Particles init
       tsParticles.load('tsparticles', {
         particles: {
@@ -167,31 +167,52 @@
       const descEl      = preview.querySelector('.preview-desc');
       const imgEl       = preview.querySelector('.preview-img');
 
-      // Paths (example)
-      const paths = ['/blueprint','/map','/network','/log','/vm','/settings','/subscription'];
-
-      const data = [
-        { title:'Build Malware', desc:'Design and customize potent malware modules to spread infection globally.', img:'assets/blueprint.png', width: 700, height: 600 },
-        { title:'World Map',     desc:'Zoom and analyze infection hotspots across the globe.',                    img:'assets/map_preview.png', width: 500, height: 300 },
-        { title:'Hacker Network',desc:'Connect with underground mercenaries and allies.',                         img:'assets/network_preview.png', width: 450, height: 250 },
-        { title:'Mission Log',   desc:'Review past operations and their outcomes.',                               img:'assets/log_preview.png', width: 420, height: 240 },
-        { title:'Virtual Machine',desc:'Test malware in a secure sandboxed environment.',                         img:'assets/vm.png', width: 700, height: 600 },
-        { title:'Settings',      desc:'' }
-      ];
-
-      let current = 0;
-      function updateMenu(i) {
-        current = i;
-        items.forEach(el => el.classList.remove('active'));
-        items[current].classList.add('active');
-        selector.style.top = items[current].offsetTop + 'px';
-
-        const entry = data[current];
-        titleEl.textContent = entry.title;
-
-        // If "Settings", render network info list
-        if (entry.title === 'Settings') {
-          descEl.innerHTML = `
+      const entries = [
+        {
+          title: 'Production Command',
+          desc: 'Deploy handcrafted payloads and tune their attributes before launch.',
+          img: 'assets/blueprint.png',
+          width: 680,
+          height: 520,
+          path: '/production.html'
+        },
+        {
+          title: 'Blueprint Lab',
+          desc: 'Design new payload archetypes and unlock specialized malware strains.',
+          img: 'assets/blueprint.png',
+          width: 680,
+          height: 520,
+          path: '/blueprint.html'
+        },
+        {
+          title: 'World Map',
+          desc: 'Coordinate global deployments, monitor spread, and tackle AV counter-measures.',
+          img: 'assets/map_preview.png',
+          width: 520,
+          height: 320,
+          path: '/map.html'
+        },
+        {
+          title: 'Black Market',
+          desc: 'Acquire shell companies and hire specialists to amplify your operation.',
+          img: 'assets/network_preview.png',
+          width: 500,
+          height: 280,
+          path: '/shop.html'
+        },
+        {
+          title: 'Sandbox VM',
+          desc: 'Spin up the virtual machine to field-test malware in a contained environment.',
+          img: 'assets/vm.png',
+          width: 700,
+          height: 560,
+          path: '/sandbox/vm.html'
+        },
+        {
+          title: 'Settings Vault',
+          desc: '',
+          path: '/settings/settings.html',
+          settingsMarkup: `
             <ul class="settings-list">
               <li><span class="settings-label">IP Address:</span> 192.168.1.42</li>
               <li><span class="settings-label">Subnet Mask:</span> 255.255.255.0</li>
@@ -199,31 +220,79 @@
               <li><span class="settings-label">DNS:</span> 8.8.8.8, 8.8.4.4</li>
               <li><span class="settings-label">MAC Address:</span> AB:CD:EF:12:34:56</li>
               <li><span class="settings-label">Hostname:</span> ELITE-Z-NODE</li>
-            </ul>`;
+            </ul>`
+        },
+        {
+          title: 'Auth Portal',
+          desc: 'Authenticate, register new operators, or terminate existing sessions.',
+          img: 'assets/network_preview.png',
+          width: 420,
+          height: 260,
+          path: '/auth.html'
+        }
+      ];
+
+      let current = 0;
+      function updateMenu(i) {
+        current = i;
+        if (!items[current]) {
+          return;
+        }
+
+        items.forEach((el) => el.classList.remove('active'));
+        items[current].classList.add('active');
+        selector.style.top = items[current].offsetTop + 'px';
+
+        const entry = entries[current];
+        if (!entry) {
+          titleEl.textContent = '';
+          descEl.textContent = '';
           imgEl.style.display = 'none';
-          } else {
-            descEl.textContent = entry.desc;
+          return;
+        }
+
+        titleEl.textContent = entry.title;
+
+        if (entry.settingsMarkup) {
+          descEl.innerHTML = entry.settingsMarkup;
+          imgEl.style.display = 'none';
+        } else {
+          descEl.textContent = entry.desc || '';
+          if (entry.img) {
             imgEl.src = entry.img;
             imgEl.style.display = 'block';
-            imgEl.style.width = (entry.width || 500) + 'px';   // fallback default
-            imgEl.style.height = (entry.height || 500) + 'px';
+            imgEl.style.width = ((entry.width || 500)) + 'px';
+            imgEl.style.height = ((entry.height || 500)) + 'px';
             imgEl.style.objectFit = 'contain';
+          } else {
+            imgEl.style.display = 'none';
           }
+        }
       }
 
       items.forEach((item, idx) => {
         item.addEventListener('mouseenter', () => updateMenu(idx));
-        item.addEventListener('click', () => window.location.href = paths[idx]);
+        item.addEventListener('click', () => {
+          const target = entries[idx]?.path;
+          if (target) {
+            window.location.href = target;
+          }
+        });
       });
 
-      document.addEventListener('keydown', e => {
+      document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-          let dir = e.key === 'ArrowDown' ? 1 : -1;
+          const dir = e.key === 'ArrowDown' ? 1 : -1;
           updateMenu((current + dir + items.length) % items.length);
           items[current].focus();
           e.preventDefault();
         }
-        if (e.key === 'Enter') items[current].click();
+        if (e.key === 'Enter') {
+          const target = entries[current]?.path;
+          if (target) {
+            window.location.href = target;
+          }
+        }
       });
 
       updateMenu(0);
@@ -233,3 +302,20 @@
   <div class="footer">© 2025 Elite Hacker Studio | All Rights Controlled</div>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

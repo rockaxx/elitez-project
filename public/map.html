@@ -2,284 +2,519 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Elite Z â€“ World Deployment Map</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elite Z – Global Command Grid</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
   <style>
-    html, body {
+    body {
       margin: 0;
-      height: 100%;
-      background-color: #020617;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at 15% 15%, rgba(59,130,246,0.18), transparent 45%),
+                  radial-gradient(circle at 85% 20%, rgba(244,114,182,0.22), transparent 52%),
+                  #030712;
       color: #e0f2fe;
       font-family: 'Orbitron', sans-serif;
       overflow: hidden;
     }
 
-    .banner {
-      position: relative;
+    .command-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
       padding: 1rem 1.5rem;
-      text-align: center;
+      background: rgba(2, 6, 23, 0.82);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.35);
+      position: relative;
+      z-index: 2;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .header-title {
+      font-size: 1.1rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .hud-bar {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .hud-chip {
+      min-width: 120px;
+      padding: 0.6rem 0.9rem;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      display: grid;
+      gap: 0.3rem;
+    }
+
+    .hud-chip span {
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(148, 163, 184, 0.8);
+    }
+
+    .hud-chip strong {
+      font-size: 1.2rem;
+      color: #f8fafc;
+    }
+
+    .xp-bar {
+      min-width: 220px;
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .xp-bar span {
+      font-size: 0.68rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      background: rgba(15, 23, 42, 0.85);
-      box-shadow: 0 6px 18px rgba(2, 6, 23, 0.45);
-      z-index: 5;
+      color: rgba(148, 163, 184, 0.75);
+    }
+
+    .xp-track {
+      position: relative;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(51, 65, 85, 0.6);
+      overflow: hidden;
+    }
+
+    .xp-fill {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #22d3ee, #a855f7);
+      transform-origin: left;
+      transform: scaleX(0);
+      transition: transform 0.9s ease;
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .cyber-btn {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #e0f2fe;
+      padding: 0.55rem 1.25rem;
+      border-radius: 999px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+    }
+
+    .cyber-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 22px rgba(56, 189, 248, 0.45);
+      border-color: rgba(244, 114, 182, 0.6);
     }
 
     .layout {
+      flex: 1;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 360px;
-      height: calc(100% - 74px);
+      grid-template-columns: minmax(0, 1fr) 380px;
+      min-height: 0;
     }
 
     #map {
       width: 100%;
       height: 100%;
-      background-color: #0f172a;
+      background: radial-gradient(circle at 50% 50%, rgba(14, 116, 144, 0.15), transparent 60%), #020617;
     }
 
-    .control-panel {
+    .side-panel {
+      background: rgba(2, 6, 23, 0.85);
+      border-left: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      background: rgba(15, 23, 42, 0.92);
-      border-left: 1px solid rgba(148, 163, 184, 0.25);
-      padding: 1.5rem;
+      gap: 1.25rem;
       overflow-y: auto;
     }
 
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .panel-header h2 {
-      margin: 0;
-      font-size: 1rem;
-      letter-spacing: 0.14em;
-    }
-
-    .ghost-btn {
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      background: transparent;
-      color: #94a3b8;
-      padding: 0.35rem 0.9rem;
-      border-radius: 999px;
-      cursor: pointer;
-      font-family: inherit;
-      letter-spacing: 0.08em;
-      transition: border 0.2s ease, color 0.2s ease;
-    }
-
-    .ghost-btn:hover {
-      color: #e0f2fe;
-      border-color: rgba(56, 189, 248, 0.7);
-    }
-
-    .panel-section {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      border-radius: 14px;
-      padding: 1rem 1.1rem;
+    .panel-block {
+      background: rgba(15, 23, 42, 0.68);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 16px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: 0 18px 30px rgba(2, 6, 23, 0.35);
       display: grid;
-      gap: 0.45rem;
+      gap: 0.6rem;
     }
 
-    .panel-section .label {
+    .panel-title {
       font-size: 0.72rem;
-      letter-spacing: 0.14em;
+      color: rgba(148, 163, 184, 0.8);
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(148, 163, 184, 0.75);
     }
 
-    .panel-section strong {
-      font-size: 1.05rem;
-      letter-spacing: 0.04em;
-    }
-
-    .panel-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-    }
-
-    .primary-btn {
-      background: linear-gradient(135deg, #22d3ee, #6366f1);
-      border: none;
-      color: #020617;
-      padding: 0.75rem 1.4rem;
-      border-radius: 999px;
-      cursor: pointer;
-      letter-spacing: 0.1em;
-      font-family: inherit;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .primary-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.35);
-    }
-
-    .stat-card {
-      display: grid;
-      gap: 0.75rem;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      border-radius: 14px;
-      padding: 1rem 1.1rem;
-      font-size: 0.85rem;
-    }
-
-    .stat-row {
+    .metrics-line {
+      font-size: 0.92rem;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-      padding-bottom: 0.4rem;
-    }
-
-    .stat-row:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    h3 {
-      margin: 0;
-      font-size: 0.9rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
     }
 
     .list-section {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      border-radius: 14px;
-      padding: 1rem 1.1rem;
-    }
-
-    .list-section ul {
-      list-style: none;
-      margin: 0.75rem 0 0;
-      padding: 0;
       display: grid;
       gap: 0.65rem;
-      font-size: 0.8rem;
-      max-height: 150px;
-      overflow-y: auto;
     }
 
-    .list-section li {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.75rem;
-      padding: 0.55rem 0.65rem;
-      border-radius: 10px;
-      background: rgba(15, 23, 42, 0.45);
-      border: 1px solid rgba(148, 163, 184, 0.12);
-    }
-
-    .list-section li span {
+    .list-section h3 {
+      margin: 0;
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
       color: rgba(148, 163, 184, 0.85);
+    }
+
+    .terminal-feed {
+      background: rgba(3, 7, 18, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 14px;
+      padding: 0.75rem;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.78rem;
+      height: 220px;
+      overflow-y: auto;
+      color: #38bdf8;
+    }
+
+    .terminal-feed span {
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    .terminal-feed .warn {
+      color: #f472b6;
+    }
+
+    .terminal-feed .info {
+      color: #38bdf8;
+    }
+
+    .terminal-feed .good {
+      color: #34d399;
     }
 
     .toast {
       position: fixed;
+      right: 24px;
       bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(120%);
-      background: rgba(15, 23, 42, 0.92);
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      color: #e0f2fe;
-      padding: 0.75rem 1.5rem;
-      border-radius: 999px;
+      min-width: 240px;
+      padding: 0.9rem 1.1rem;
+      border-radius: 12px;
+      background: rgba(15, 118, 110, 0.82);
+      color: #ccfbf1;
+      font-family: 'Fira Code', monospace;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      transition: transform 0.25s ease;
-      z-index: 20;
+      opacity: 0;
       pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 10;
     }
 
     .toast.visible {
-      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .toast.error {
-      border-color: rgba(248, 113, 113, 0.5);
-      color: #fca5a5;
+      background: rgba(185, 28, 28, 0.82);
+      color: #fee2e2;
     }
 
-    .toast.success {
-      border-color: rgba(110, 231, 183, 0.5);
-      color: #bbf7d0;
+    .challenge-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.78);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
     }
 
-    @media (max-width: 980px) {
-      .layout {
-        grid-template-columns: 1fr;
-        grid-template-rows: minmax(0, 1fr) auto;
-        height: calc(100% - 74px);
-      }
+    .challenge-modal.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
 
-      .control-panel {
-        height: auto;
-        border-left: none;
-        border-top: 1px solid rgba(148, 163, 184, 0.25);
-      }
+    .skilltree-panel {
+      width: min(900px, 90vw);
+      max-height: 90vh;
+      background: rgba(7, 11, 25, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 18px;
+      padding: 1.5rem;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 1rem;
+      box-shadow: 0 22px 50px rgba(0, 0, 0, 0.55);
+    }
+
+    .skilltree-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .skilltree-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      overflow-y: auto;
+    }
+
+    .skill-node {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 14px;
+      padding: 1rem;
+      display: grid;
+      gap: 0.45rem;
+      transition: transform 0.2s ease, border 0.2s ease;
+      position: relative;
+    }
+    .skill-node.locked {
+      border-color: rgba(148, 163, 184, 0.25);
+      opacity: 0.6;
+    }
+
+    .skill-node.available:hover {
+      cursor: pointer;
+      transform: translateY(-2px);
+      border-color: rgba(244, 114, 182, 0.6);
+    }
+
+    .skill-node h4 {
+      margin: 0;
+      font-size: 0.95rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .skill-node p {
+      margin: 0;
+      font-size: 0.78rem;
+      color: rgba(226, 232, 240, 0.85);
+      line-height: 1.4;
+    }
+
+    .skill-cost {
+      font-size: 0.7rem;
+      letter-spacing: 0.16em;
+      color: rgba(148, 163, 184, 0.85);
+      text-transform: uppercase;
+    }
+
+    .skill-node.unlocked::after {
+      content: 'UNLOCKED';
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 0.6rem;
+      letter-spacing: 0.16em;
+      color: #34d399;
+    }
+
+    #challengePrompt {
+      font-size: 0.82rem;
+      line-height: 1.45;
+      color: rgba(224, 242, 254, 0.9);
+    }
+
+    #challengeInput {
+      width: 100%;
+      min-height: 90px;
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #e0f2fe;
+      font-family: 'Fira Code', monospace;
+      letter-spacing: 0.05em;
+      resize: vertical;
+    }
+
+    .challenge-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .challenge-item {
+      padding: 0.55rem 0.8rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 10px;
+      font-size: 0.78rem;
+      display: grid;
+      gap: 0.25rem;
+      cursor: pointer;
+      transition: border 0.2s ease, transform 0.2s ease;
+    }
+
+    .challenge-item.active {
+      border-color: rgba(56, 189, 248, 0.7);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .challenge-item span {
+      font-size: 0.68rem;
+      letter-spacing: 0.16em;
+      color: rgba(148, 163, 184, 0.8);
+    }
+
+    .metrics-value {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #f4f4f5;
+    }
+
+    .list-scroll {
+      max-height: 160px;
+      overflow-y: auto;
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .list-scroll li {
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      background: rgba(15, 23, 42, 0.55);
+      padding: 0.45rem 0.65rem;
+      border-radius: 10px;
+    }
+
+    .av-panel {
+      display: grid;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: rgba(226, 232, 240, 0.88);
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 rgba(56, 189, 248, 0.0); }
+      50% { box-shadow: 0 0 25px rgba(56, 189, 248, 0.25); }
     }
   </style>
 </head>
 <body>
-  <div class="banner">World Deployment Map â€“ Select a country to deploy your armed malware</div>
+  <header class="command-header">
+    <div class="header-left">
+      <div class="header-title">CYBERNET GLOBAL INFECTION GRID</div>
+      <div class="hud-bar">
+        <div class="hud-chip"><span>Operator</span><strong id="operatorName">--</strong></div>
+        <div class="hud-chip"><span>Blueprint</span><strong id="currentBlueprint">None</strong></div>
+        <div class="hud-chip"><span>Malware Quality</span><strong id="currentQuality">0.50</strong></div>
+        <div class="hud-chip"><span>Spread / Stealth / Resilience</span><strong id="currentAttributes">0.50 / 0.50 / 0.50</strong></div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="xp-bar">
+        <span>XP PROGRESSION</span>
+        <div class="xp-track"><div class="xp-fill" id="hudXpFill"></div></div>
+        <span id="hudXpLabel">0 / 140 XP</span>
+      </div>
+      <div class="hud-chip"><span>Level</span><strong id="hudLevel">1</strong></div>
+      <div class="hud-chip"><span>Skill Points</span><strong id="hudSkillPoints">0</strong></div>
+      <div class="hud-chip"><span>Capital</span><strong id="hudCapital">0</strong></div>
+      <button class="cyber-btn" id="skillTreeBtn">Skill Tree</button>
+      <button class="cyber-btn" id="homeBtn">Home</button>
+      <button class="cyber-btn" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
   <div class="layout">
     <div id="map"></div>
-    <aside class="control-panel">
-      <div class="panel-header">
-        <h2>Deployment Console</h2>
-        <button id="logoutBtn" class="ghost-btn">Logout</button>
-      </div>
-      <div class="panel-section">
-        <div class="label">Operator</div>
-        <strong id="operatorName">â€”</strong>
-      </div>
-      <div class="panel-section">
-        <div class="label">Armed Blueprint</div>
-        <strong id="currentBlueprint">None</strong>
-      </div>
-      <div class="panel-section">
-        <div class="label">Malware Quality</div>
-        <strong id="currentQuality">0.50</strong>
-      </div>
-      <div class="panel-section">
-        <div class="label">Attributes</div>
-        <strong id="currentAttributes">0.50 / 0.50 / 0.50</strong>
-      </div>
-      <div class="panel-buttons">
-        <button id="refreshState" class="primary-btn">Sync State</button>
-        <button id="openProduction" class="ghost-btn">Production</button>
-      </div>
-      <div class="stat-card">
-        <div class="stat-row"><span>Active Infections</span><strong id="activeCount">0</strong></div>
-        <div class="stat-row"><span>Pending Exposures</span><strong id="exposureCount">0</strong></div>
-        <div class="stat-row"><span>Total Infected</span><strong id="totalInfected">0</strong></div>
-      </div>
-      <section class="list-section">
+    <aside class="side-panel">
+      <section class="panel-block">
+        <div class="panel-title">Deployment Metrics</div>
+        <div class="metrics-line"><span>Active infections</span><span class="metrics-value" id="activeCount">0</span></div>
+        <div class="metrics-line"><span>Pending exposures</span><span class="metrics-value" id="exposureCount">0</span></div>
+        <div class="metrics-line"><span>Total infected</span><span class="metrics-value" id="totalInfected">0</span></div>
+      </section>
+
+      <section class="panel-block">
+        <div class="panel-title">Antivirus Oversight</div>
+        <div class="av-panel">
+          <div><strong>Country:</strong> <span id="avCountry">Select a region</span></div>
+          <div id="avDetails">No telemetry available.</div>
+        </div>
+        <div class="list-section">
+          <h3>Challenges</h3>
+          <div class="list-scroll" id="challengeList"></div>
+        </div>
+        <div class="panel-title">Bypass Console</div>
+        <div id="challengePrompt">Select a challenge to view the required override string.</div>
+        <textarea id="challengeInput" placeholder="patch.override(&quot;TOKEN&quot;)"></textarea>
+        <div class="challenge-actions">
+          <button class="cyber-btn" id="submitChallenge">Submit Override</button>
+        </div>
+      </section>
+
+      <section class="panel-block list-section">
         <h3>Active Infections</h3>
-        <ul id="infectionList"></ul>
+        <div class="list-scroll" id="infectionList"></div>
       </section>
-      <section class="list-section">
+
+      <section class="panel-block list-section">
         <h3>Exposure Radar</h3>
-        <ul id="exposureList"></ul>
+        <div class="list-scroll" id="exposureList"></div>
       </section>
-      <section class="list-section">
-        <h3>Latest Events</h3>
-        <ul id="eventList"></ul>
+
+      <section class="panel-block">
+        <div class="panel-title">Event Feed</div>
+        <div class="terminal-feed" id="eventFeed"></div>
       </section>
     </aside>
   </div>
-  <div id="toast" class="toast"></div>
 
+  <div class="toast" id="toast"></div>
+
+  <div class="challenge-modal" id="skillTreeModal">
+    <div class="skilltree-panel">
+      <div class="skilltree-header">
+        <div>
+          <div class="panel-title">Skill Tree</div>
+          <div style="font-size:0.82rem;color:rgba(226,232,240,0.85);">Invest skill points to evolve your cyber pathogen.</div>
+        </div>
+        <div class="hud-chip"><span>Available Points</span><strong id="modalSkillPoints">0</strong></div>
+        <button class="cyber-btn" id="closeSkillTree">Close</button>
+      </div>
+      <div class="skilltree-grid" id="skillGrid"></div>
+      <div style="font-size:0.72rem;color:rgba(148,163,184,0.75);text-align:right">Hover a node to inspect. Unlocked nodes glow cyan, available nodes pulse magenta.</div>
+    </div>
+  </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="assets/client-api.js"></script>
   <script>
@@ -288,44 +523,80 @@
       let geojsonLayer;
       const infectedCountries = new Map();
       const exposureMap = new Map();
+      const countryMeta = new Map();
+      const avBypasses = new Map();
       let currentConfig = null;
+      let progressionState = null;
       let operatorName = null;
+      let activeChallenge = null;
+      const challengeMap = new Map();
       const toast = document.getElementById('toast');
+      let skillTree = [];
+      let companies = [];
+      let audioContext;
 
       const elements = {
+        operator: document.getElementById('operatorName'),
         blueprint: document.getElementById('currentBlueprint'),
         quality: document.getElementById('currentQuality'),
         attributes: document.getElementById('currentAttributes'),
         infectionList: document.getElementById('infectionList'),
         exposureList: document.getElementById('exposureList'),
-        eventList: document.getElementById('eventList'),
+        eventFeed: document.getElementById('eventFeed'),
         activeCount: document.getElementById('activeCount'),
         exposureCount: document.getElementById('exposureCount'),
         totalInfected: document.getElementById('totalInfected'),
-        operator: document.getElementById('operatorName')
+        hudLevel: document.getElementById('hudLevel'),
+        hudSkillPoints: document.getElementById('hudSkillPoints'),
+        hudCapital: document.getElementById('hudCapital'),
+        hudXpFill: document.getElementById('hudXpFill'),
+        hudXpLabel: document.getElementById('hudXpLabel'),
+        skillTreeBtn: document.getElementById('skillTreeBtn'),
+        skillTreeModal: document.getElementById('skillTreeModal'),
+        skillGrid: document.getElementById('skillGrid'),
+        modalSkillPoints: document.getElementById('modalSkillPoints'),
+        avCountry: document.getElementById('avCountry'),
+        avDetails: document.getElementById('avDetails'),
+        challengeList: document.getElementById('challengeList'),
+        challengePrompt: document.getElementById('challengePrompt'),
+        challengeInput: document.getElementById('challengeInput'),
+        submitChallenge: document.getElementById('submitChallenge'),
+        homeBtn: document.getElementById('homeBtn'),
+        logoutBtn: document.getElementById('logoutBtn'),
+        closeSkillTree: document.getElementById('closeSkillTree')
       };
 
-      document.getElementById('refreshState').addEventListener('click', loadState);
-      document.getElementById('openProduction').addEventListener('click', () => {
-        window.location.href = '/production';
-      });
-      document.getElementById('logoutBtn').addEventListener('click', async () => {
-        await API.logout();
-        window.location.href = '/auth.html';
-      });
+      function ensureAudioContext() {
+        if (audioContext) return audioContext;
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        return audioContext;
+      }
+
+      function playTone(frequency = 520, duration = 0.12) {
+        try {
+          const ctx = ensureAudioContext();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = frequency;
+          gain.gain.value = 0.12;
+          osc.connect(gain).connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + duration);
+        } catch (err) {
+          // ignore audio errors
+        }
+      }
 
       function showToast(message, isError = false) {
         if (!message) {
-          toast.classList.remove('visible', 'error', 'success');
+          toast.classList.remove('visible', 'error');
           return;
         }
         toast.textContent = message;
-        toast.classList.remove('error', 'success');
-        toast.classList.add(isError ? 'error' : 'success');
+        toast.classList.toggle('error', !!isError);
         toast.classList.add('visible');
-        setTimeout(() => {
-          toast.classList.remove('visible');
-        }, 2600);
+        setTimeout(() => toast.classList.remove('visible'), 2400);
       }
 
       function initMap() {
@@ -338,53 +609,52 @@
             [-85, -180],
             [85, 180]
           ],
-          maxBoundsViscosity: 1.0,
-          worldCopyJump: false
+          worldCopyJump: false,
+          zoomControl: false
         });
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-          attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+          attribution: '&copy; CARTO',
           subdomains: 'abcd',
           noWrap: true
         }).addTo(map);
       }
 
-      function getCountryColor(name) {
-        if (infectedCountries.has(name)) {
-          const intensity = Math.max(0, Math.min(1, infectedCountries.get(name).intensity || 0));
-          const r = Math.floor(200 + intensity * 55);
-          const g = Math.floor(30 + (1 - intensity) * 70);
-          return `rgba(${r}, ${g}, 90, 0.8)`;
+      function infectionFill(name) {
+        const infection = infectedCountries.get(name);
+        if (infection) {
+          const intensity = Math.max(0, Math.min(1, infection.intensity || 0));
+          const r = 220;
+          const g = Math.floor(40 + (1 - intensity) * 70);
+          const b = Math.floor(60 + (1 - intensity) * 60);
+          return `rgba(${r}, ${g}, ${b}, ${0.25 + intensity * 0.55})`;
         }
         if (exposureMap.has(name)) {
-          const progress = Math.max(0, Math.min(1, exposureMap.get(name).progress || 0));
-          const alpha = 0.2 + progress * 0.5;
+          const entry = exposureMap.get(name);
+          const progress = Math.max(0, Math.min(1, entry.progress || entry || 0));
+          const alpha = 0.2 + progress * 0.45;
           return `rgba(56, 189, 248, ${alpha})`;
         }
-        return 'rgba(148, 163, 184, 0.22)';
+        return 'rgba(51, 65, 85, 0.45)';
       }
 
       function styleFeature(feature) {
         const countryName = feature.properties.ADMIN || feature.properties.name;
         return {
-          fillColor: getCountryColor(countryName),
+          fillColor: infectionFill(countryName),
           weight: 1,
           opacity: 1,
           color: '#1e293b',
-          fillOpacity: infectedCountries.has(countryName) ? 0.85 : 0.6
+          fillOpacity: 0.85
         };
       }
 
       function onEachFeature(feature, layer) {
         const countryName = feature.properties.ADMIN || feature.properties.name;
         layer.on({
-          mouseover: function () {
-            layer.setStyle({ color: '#38bdf8', weight: 2 });
-          },
-          mouseout: function () {
-            geojsonLayer.resetStyle(layer);
-          },
-          click: function () {
+          mouseover: () => layer.setStyle({ color: '#a855f7', weight: 2 }),
+          mouseout: () => geojsonLayer && geojsonLayer.resetStyle(layer),
+          click: () => {
             if (!countryName) {
               return;
             }
@@ -403,27 +673,22 @@
         }).addTo(map);
       }
 
-      function updateLists(snapshot) {
+      function renderLists(snapshot) {
         elements.infectionList.innerHTML = '';
         elements.exposureList.innerHTML = '';
-        elements.eventList.innerHTML = '';
 
-        const infections = snapshot?.infectedCountries || [];
-        const exposures = snapshot?.pendingExposures || [];
-        const events = snapshot?.events || [];
-
-        infections.forEach((entry) => {
+        (snapshot?.infectedCountries || []).forEach((entry) => {
           const li = document.createElement('li');
           const name = document.createElement('strong');
           name.textContent = entry.country;
           const info = document.createElement('span');
-          info.textContent = `Intensity ${Number(entry.intensity || 0).toFixed(2)}`;
+          info.textContent = `Intensity ${(entry.intensity || 0).toFixed(2)}`;
           li.appendChild(name);
           li.appendChild(info);
           elements.infectionList.appendChild(li);
         });
 
-        exposures.forEach((entry) => {
+        (snapshot?.pendingExposures || []).forEach((entry) => {
           const li = document.createElement('li');
           const name = document.createElement('strong');
           name.textContent = entry.country;
@@ -433,17 +698,37 @@
           li.appendChild(info);
           elements.exposureList.appendChild(li);
         });
+      }
 
+      function eventClass(type) {
+        switch (type) {
+          case 'INFECTED':
+          case 'AV_BYPASSED':
+            return 'good';
+          case 'AV_BLOCK':
+          case 'WHO_ALERT':
+            return 'warn';
+          default:
+            return 'info';
+        }
+      }
+
+      function renderEvents(events = []) {
+        const feed = elements.eventFeed;
+        feed.innerHTML = '';
         events.slice().reverse().forEach((event) => {
-          const li = document.createElement('li');
-          const type = document.createElement('strong');
-          type.textContent = event.type;
-          const time = document.createElement('span');
-          time.textContent = new Date(event.timestamp).toLocaleTimeString();
-          li.appendChild(type);
-          li.appendChild(time);
-          elements.eventList.appendChild(li);
+          const span = document.createElement('span');
+          span.className = eventClass(event.type);
+          const time = new Date(event.timestamp).toLocaleTimeString();
+          const label = event.label || event.type;
+          const detail = Object.entries(event)
+            .filter(([key]) => !['type', 'timestamp', 'label'].includes(key))
+            .map(([key, value]) => `${key}:${typeof value === 'object' ? JSON.stringify(value) : value}`)
+            .join(' ');
+          span.textContent = `[${time}] ${label} ${detail}`;
+          feed.appendChild(span);
         });
+        feed.scrollTop = feed.scrollHeight;
       }
 
       function applySnapshot(snapshot, config) {
@@ -461,22 +746,191 @@
         infectedCountries.clear();
         exposureMap.clear();
 
-        (snapshot?.infectedCountries || []).forEach((entry) => {
-          infectedCountries.set(entry.country, entry);
-        });
-
-        (snapshot?.pendingExposures || []).forEach((entry) => {
-          exposureMap.set(entry.country, entry);
-        });
+        (snapshot?.infectedCountries || []).forEach((entry) => infectedCountries.set(entry.country, entry));
+        (snapshot?.pendingExposures || []).forEach((entry) => exposureMap.set(entry.country, entry));
 
         elements.activeCount.textContent = snapshot?.activeInfections ?? infectedCountries.size;
         elements.exposureCount.textContent = snapshot?.pendingExposures?.length ?? exposureMap.size;
         elements.totalInfected.textContent = snapshot?.totalInfected ?? infectedCountries.size;
 
-        updateLists(snapshot);
+        renderLists(snapshot);
+        renderEvents(snapshot?.events || []);
 
         if (geojsonLayer) {
           geojsonLayer.setStyle(styleFeature);
+        }
+      }
+
+      function updateProgressionHud(progression) {
+        progressionState = progression;
+        if (!progression) {
+          elements.hudLevel.textContent = '--';
+          elements.hudSkillPoints.textContent = '0';
+          elements.hudCapital.textContent = '0';
+          elements.hudXpFill.style.transform = 'scaleX(0)';
+          elements.hudXpLabel.textContent = '0 / 0 XP';
+          return;
+        }
+        elements.hudLevel.textContent = progression.level || 1;
+        elements.hudSkillPoints.textContent = progression.skillPoints || 0;
+        elements.hudCapital.textContent = progression.capital || 0;
+        elements.modalSkillPoints.textContent = progression.skillPoints || 0;
+        const xp = progression.xp || 0;
+        const xpToNext = progression.xpToNext || 1;
+        const ratio = Math.max(0, Math.min(1, xpToNext ? xp / xpToNext : 0));
+        elements.hudXpFill.style.transform = `scaleX(${ratio})`;
+        elements.hudXpLabel.textContent = `${xp} / ${xpToNext} XP`;
+      }
+
+      function updateAvPanel(countryName) {
+        if (!countryName) {
+          elements.avCountry.textContent = 'Select a region';
+          elements.avDetails.textContent = 'No telemetry available.';
+          return;
+        }
+        elements.avCountry.textContent = countryName;
+        const meta = countryMeta.get(countryName) || countryMeta.get((countryName || '').toUpperCase());
+        if (!meta || !meta.antivirus) {
+          elements.avDetails.textContent = 'No antivirus intelligence for this region.';
+          return;
+        }
+        const vendor = meta.antivirus.vendor || 'Unknown';
+        const tier = meta.antivirus.tier || '?';
+        const difficulty = typeof meta.antivirus.difficulty === 'number' ? Math.round(meta.antivirus.difficulty * 100) : '??';
+        const reward = meta.antivirus.rewardXp || 0;
+        const bypass = avBypasses.get(countryName);
+        const status = bypass && bypass.unlocked ? 'Bypass unlocked' : 'Bypass required';
+        elements.avDetails.innerHTML = `Vendor: <strong>${vendor}</strong><br>Tier ${tier} • Difficulty ${difficulty}%<br>Reward: ${reward} XP<br>Status: ${status}`;
+      }
+      function renderChallenges(challenges = []) {
+        elements.challengeList.innerHTML = '';
+        challengeMap.clear();
+        if (!Array.isArray(challenges) || challenges.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'challenge-item';
+          empty.textContent = 'No active challenges';
+          elements.challengeList.appendChild(empty);
+          activeChallenge = null;
+          elements.challengePrompt.textContent = 'Everything is quiet. Prepare your next strike.';
+          return;
+        }
+
+        challenges.forEach((challenge) => {
+          challengeMap.set(challenge.id, challenge);
+          const item = document.createElement('div');
+          item.className = 'challenge-item';
+          item.dataset.challengeId = challenge.id;
+          item.innerHTML = `<span>${challenge.country} • Tier ${challenge.tier}</span><strong>${challenge.vendor}</strong>`;
+          if (activeChallenge && activeChallenge.id === challenge.id) {
+            item.classList.add('active');
+          }
+          elements.challengeList.appendChild(item);
+        });
+
+        if (!activeChallenge || !challengeMap.has(activeChallenge.id)) {
+          activeChallenge = challenges[0];
+        }
+        setActiveChallenge(activeChallenge);
+      }
+
+      function setActiveChallenge(challenge) {
+        activeChallenge = challenge || null;
+        Array.from(elements.challengeList.children).forEach((item) => {
+          const isActive = activeChallenge && item.dataset.challengeId === activeChallenge.id;
+          item.classList.toggle('active', isActive);
+        });
+        if (activeChallenge) {
+          elements.challengePrompt.textContent = activeChallenge.prompt;
+          elements.challengeInput.value = '';
+          updateAvPanel(activeChallenge.country);
+        }
+      }
+
+      function renderSkillTree() {
+        if (!Array.isArray(skillTree)) {
+          return;
+        }
+        elements.skillGrid.innerHTML = '';
+        const ownedSkills = new Set(progressionState?.skillsUnlocked || []);
+        const skillPoints = progressionState?.skillPoints || 0;
+
+        skillTree.forEach((skill) => {
+          const node = document.createElement('div');
+          node.className = 'skill-node';
+          node.dataset.skillId = skill.id;
+          const unlocked = ownedSkills.has(skill.id);
+          const requirementsMet = (skill.requires || []).every((req) => ownedSkills.has(req));
+          const affordable = skillPoints >= (skill.cost || 1);
+          const available = !unlocked && requirementsMet && affordable;
+
+          if (unlocked) {
+            node.classList.add('unlocked');
+          } else if (available) {
+            node.classList.add('available');
+          } else {
+            node.classList.add('locked');
+          }
+
+          node.innerHTML = `
+            <h4>${skill.name}</h4>
+            <div class="skill-cost">Cost: ${skill.cost || 1} SP</div>
+            <p>${skill.description}</p>
+          `;
+
+          if (!unlocked) {
+            node.addEventListener('click', async () => {
+              if (!node.classList.contains('available')) {
+                return;
+              }
+              try {
+                await API.unlockSkill(skill.id);
+                playTone(760, 0.18);
+                const prog = await API.fetchProgression();
+                updateProgressionHud(prog?.progression || null);
+                skillTree = prog?.skillTree || skillTree;
+                renderSkillTree();
+                showToast(`${skill.name} unlocked`, false);
+              } catch (err) {
+                const message = (err?.data?.error) || err.message || 'Unlock failed';
+                showToast(message, true);
+              }
+            });
+          }
+
+          elements.skillGrid.appendChild(node);
+        });
+      }
+
+      function renderAvBypasses(list = []) {
+        avBypasses.clear();
+        list.forEach((entry) => avBypasses.set(entry.country, entry));
+      }
+
+      async function loadCountryMetadata() {
+        try {
+          const data = await API.request('/api/countries', { skipRedirect: true });
+          (data || []).forEach((entry) => {
+            countryMeta.set(entry.name, entry);
+            if (entry.code) {
+              countryMeta.set(entry.code, entry);
+            }
+          });
+        } catch (err) {
+          console.warn('Unable to load country metadata:', err);
+        }
+      }
+
+      async function refreshProgression() {
+        try {
+          const data = await API.fetchProgression();
+          updateProgressionHud(data?.progression || null);
+          renderAvBypasses(data?.progression?.avBypasses || []);
+          renderChallenges(data?.progression?.pendingChallenges || []);
+          skillTree = data?.skillTree || skillTree;
+          companies = data?.companies || companies;
+          renderSkillTree();
+        } catch (err) {
+          console.warn('Unable to fetch progression:', err);
         }
       }
 
@@ -484,6 +938,9 @@
         try {
           const response = await API.request('/api/world/state', { skipRedirect: true });
           applySnapshot(response?.snapshot, response?.config);
+          updateProgressionHud(response?.snapshot?.progression || null);
+          renderAvBypasses(response?.snapshot?.progression?.avBypasses || []);
+          renderChallenges(response?.snapshot?.progression?.pendingChallenges || []);
         } catch (err) {
           console.error('Failed to load world state:', err);
           showToast('Unable to sync state', true);
@@ -502,39 +959,104 @@
             body: { country: countryName, reapply: alreadyInfected },
             skipRedirect: true
           });
-          applySnapshot(response?.snapshot, response?.config);
-          const message = alreadyInfected
-            ? `${countryName}: intensity boosted`
-            : `${countryName}: infection deployed`;
-          showToast(message, false);
+          if (response?.blocked) {
+            const challenge = response.challenge;
+            if (challenge) {
+              challengeMap.set(challenge.id, challenge);
+              renderChallenges(Array.from(challengeMap.values()));
+              setActiveChallenge(challenge);
+            }
+            showToast(`${countryName} firewall engaged.`, true);
+            playTone(320, 0.18);
+          } else {
+            applySnapshot(response?.snapshot, response?.config);
+            showToast(`${alreadyInfected ? 'Boosted' : 'Deployed'} @ ${countryName}`, false);
+            playTone(alreadyInfected ? 680 : 560, 0.18);
+          }
         } catch (err) {
           const text = (err?.data?.error) || err.message || 'Deployment failed';
           showToast(text, true);
         }
       }
 
-      async function init() {
+      elements.challengeList.addEventListener('click', (event) => {
+        const item = event.target.closest('.challenge-item');
+        if (!item || !item.dataset.challengeId) {
+          return;
+        }
+        const challenge = challengeMap.get(item.dataset.challengeId);
+        if (challenge) {
+          setActiveChallenge(challenge);
+          updateAvPanel(challenge.country);
+        }
+      });
+
+      elements.submitChallenge.addEventListener('click', async () => {
+        if (!activeChallenge) {
+          showToast('Select a challenge first.', true);
+          return;
+        }
+        const answer = elements.challengeInput.value.trim();
+        if (!answer) {
+          showToast('Enter bypass code.', true);
+          return;
+        }
+        try {
+          await API.submitAvBypass(activeChallenge.id, answer);
+          playTone(880, 0.2);
+          elements.challengeInput.value = '';
+          await loadState();
+          await refreshProgression();
+          showToast('Antivirus bypassed', false);
+        } catch (err) {
+          const message = (err?.data?.error) || err.message || 'Bypass failed';
+          showToast(message, true);
+          playTone(220, 0.25);
+        }
+      });
+
+      elements.skillTreeBtn.addEventListener('click', () => {
+        elements.skillTreeModal.classList.add('visible');
+        renderSkillTree();
+      });
+
+      elements.closeSkillTree.addEventListener('click', () => {
+        elements.skillTreeModal.classList.remove('visible');
+      });
+
+      elements.homeBtn.addEventListener('click', () => {
+        window.location.href = '/';
+      });
+
+      elements.logoutBtn.addEventListener('click', async () => {
+        await API.logout();
+        window.location.href = '/auth.html';
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          elements.skillTreeModal.classList.remove('visible');
+        }
+      });
+
+      (async function init() {
         try {
           const session = await API.ensureAuthenticated();
           if (session?.user) {
             operatorName = session.user.username;
             elements.operator.textContent = operatorName;
           }
-          if (session?.config) {
-            currentConfig = session.config;
-            applySnapshot(null, session.config);
-          }
+          await loadCountryMetadata();
           await loadState();
+          await refreshProgression();
+          initMap();
+          await loadGeoJson();
         } catch (err) {
-          console.error('Failed to authenticate on map page:', err);
+          console.error('Unable to initialise map view:', err);
         }
-      }
-
-      initMap();
-      loadGeoJson().then(() => {
-        init();
-      });
+      })();
     })();
   </script>
 </body>
 </html>
+
